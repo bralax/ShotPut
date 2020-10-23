@@ -8,6 +8,7 @@ public class Endpoint {
    private List<Parameter> queryParams;
    private List<Parameter> formParams;
    private List<Parameter> headerParams;
+   private List<Parameter> responseHeaders;
    private List<Parameter> responseStatuses;
    private String responseType;
    private String responseDescription;
@@ -24,6 +25,7 @@ public class Endpoint {
       this.formParams = new ArrayList<>();
       this.headerParams = new ArrayList<>();
       this.responseStatuses = new ArrayList<>();
+      this.responseHeaders = new ArrayList<>();
    }
    
    public Endpoint(Type type, String endpoint) {
@@ -36,6 +38,7 @@ public class Endpoint {
       this.formParams = new ArrayList<>();
       this.headerParams = new ArrayList<>();
       this.responseStatuses = new ArrayList<>();
+      this.responseHeaders = new ArrayList<>();
    }
    
    public void addPathParam(Parameter param) {
@@ -56,6 +59,10 @@ public class Endpoint {
 
    public void addResponseStatus(Parameter param) {
       this.responseStatuses.add(param);
+   }
+
+   public void addResponseHeader(Parameter param) {
+      this.responseHeaders.add(param);
    }
    
    public String getType() {
@@ -115,6 +122,7 @@ public class Endpoint {
       "Query Parameters: " + this.queryParams + "\n" +
       "Form Parameters" + this.formParams + "\n" + 
       "Request Headers" + this.headerParams + "\n" + 
+      "Response Headers" + this.responseHeaders + "\n" + 
       "Response Status Codes: " + this.responseStatuses + "}";
    }
 

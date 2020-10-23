@@ -1,13 +1,16 @@
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.IntegerLiteralExpr;
 import com.github.javaparser.ast.expr.LambdaExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.visitor.TreeVisitor;
@@ -69,7 +72,7 @@ public class ASTParser {
             if (node instanceof ExpressionStmt) {
                 ExpressionStmt stmt = (ExpressionStmt) node;
                 if (stmt.getExpression() instanceof MethodCallExpr) {
-                    System.out.println("YES");
+                    
                     MethodCallExpr call = (MethodCallExpr) stmt.getExpression();
                     Optional<Expression> exp = call.getScope();
                     if (exp.isPresent() && exp.get() instanceof NameExpr) {
@@ -80,17 +83,53 @@ public class ASTParser {
                             if (stmt.getComment().isPresent() && stmt.getComment().get() instanceof JavadocComment) {
                                 JavadocComment comment = (JavadocComment) stmt.getComment().get();
                                 Javadoc javadoc = parseJavadoc(comment);
-                                System.out.println(javadoc.getBlockTags().size());
-                                for (JavadocBlockTag tag : javadoc.getBlockTags()) {
-                                    System.out.println("Tag:" + tag.getTagName() + "\t Name:" + tag.getName() + "\t Content:" + tag.getContent());
-                                }
+                                List<JavadocBlockTag> tags = new ArrayList<>();
+                                tags.addAll(javadoc.getBlockTags());
+                                System.out.println(tags);
                                 endpoint.setType(Endpoint.Type.valueOf(call.getNameAsString().toUpperCase()));
+                                getCommentTag(tags, "endpointType");
                                 if (call.getArgument(0) instanceof StringLiteralExpr) {
                                     endpoint.setEndpoint(((StringLiteralExpr)call.getArgument(0)).asString());
+                                    getCommentTag(tags, "endpoint");
+                                } else {
+                                    JavadocBlockTag tag = getCommentTag(tags, "endoint");
+                                    if (tag != null) {
+                                        endpoint.setEndpoint(tag.getContent().toText().strip());
+                                    }
                                 }
                                 if (call.getArgument(1) instanceof LambdaExpr) {
-                                    parseLambdaExpression((LambdaExpr)call.getArgument(1), endpoint, javadoc.getBlockTags());
+                                    parseLambdaExpression((LambdaExpr)call.getArgument(1), endpoint, tags);
                                 }
+                                for (JavadocBlockTag tag: tags) {
+                                    String content = tag.getContent().toText().strip();
+                                    switch (tag.getTagName()) {
+                                        case "endpoint":
+                                            endpoint.setEndpoint(content);
+                                            break;
+                                        case "endpointType":
+                                            endpoint.setType(Endpoint.Type.valueOf(content));
+                                            break;
+                                        case "endpointQueryParam":
+                                            endpoint.addQueryParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
+                                            break;
+                                        case "endpointPathParam":
+                                            endpoint.addPathParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
+                                            break;
+                                        case "endpointFormParam":
+                                            endpoint.addFormParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
+                                            break;
+                                        case "endpointRequestHeader":
+                                            endpoint.addHeaderParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
+                                            break;
+                                        case "endpointResponseHeader":
+                                            endpoint.addResponseHeader(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
+                                            break;
+                                        case "endpointStatus":
+                                            endpoint.addResponseStatus(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
+                                            break;
+                                    }
+                                }
+                                endpoint.setDescription(javadoc.getDescription().toText());
                             }
                             endpoints.add(endpoint);
                         }
@@ -110,10 +149,139 @@ public class ASTParser {
         } 
     }
 
+    private void parseRemainingComment(List<JavadocBlockTag> tags) {
+        for (JavadocBlockTag tag : tags) {
+            switch
+        }
+    }
+
     private void parseLambdaExpression(LambdaExpr expr, Endpoint endpoint, List<JavadocBlockTag> tags) {
         Statement e = expr.getBody();
-        System.out.println(e.getClass().getSimpleName());
+        if (e instanceof BlockStmt) {
+            NodeList<Statement> stmts = ((BlockStmt) e).getStatements();
+            for(Statement stmt: stmts) {
+                if (stmt instanceof ExpressionStmt) {
+                    ExpressionStmt stm = (ExpressionStmt) stmt;
+                    if (stm.getExpression() instanceof MethodCallExpr) {
+                        MethodCallExpr call = (MethodCallExpr) stm.getExpression();
+                        Optional<Expression> exp = call.getScope();
+                        if (exp.isPresent() && exp.get() instanceof NameExpr) {
+                            //System.out.println(getSymbol((NameExpr) exp.get()));
+                            if (getSymbol((NameExpr) exp.get()).equals("? super io.javalin.http.Context")) {
+                                System.out.println(call.getNameAsString());
+                                switch(call.getNameAsString()) {
+                                    case "json":
+                                        endpoint.setResponseType("json");
+                                        break;
+                                    case "formParam":
+                                        if (call.getArgument(0) instanceof StringLiteralExpr) {
+                                            JavadocBlockTag tag = getCommentTag(tags,"endpointFormParam",((StringLiteralExpr) call.getArgument(0)).asString());
+                                            if (tag != null) {
+                                                String content = tag.getContent().toText().strip();
+                                                endpoint.addFormParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                                            } else {
+                                                endpoint.addFormParam(new Parameter(call.getArgument(0).toString(), ""));
+                                            }
+                                        }
+                                        break;
+                                    case "pathParam":
+                                        if (call.getArgument(0) instanceof StringLiteralExpr) {
+                                            JavadocBlockTag tag = getCommentTag(tags,"endpointPathParam",((StringLiteralExpr) call.getArgument(0)).asString());
+                                            if (tag != null) {
+                                                String content = tag.getContent().toText().strip();
+                                                endpoint.addPathParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                                            } else {
+                                                endpoint.addPathParam(new Parameter(call.getArgument(0).toString(), ""));
+                                            }
+                                        }
+                                        break;
+                                    case "header":
+                                        if (call.getArguments().size() == 1) {
+                                            if (call.getArgument(0) instanceof StringLiteralExpr) {
+                                                JavadocBlockTag tag = getCommentTag(tags,"endpointRequestHeader",((StringLiteralExpr) call.getArgument(0)).asString());
+                                                if (tag != null) {
+                                                    String content = tag.getContent().toText().strip();
+                                                    endpoint.addHeaderParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                                                } else {
+                                                    endpoint.addHeaderParam(new Parameter(call.getArgument(0).toString(), ""));
+                                                }
+                                            }
+                                        } else {
+                                            if (call.getArgument(0) instanceof StringLiteralExpr) {
+                                                JavadocBlockTag tag = getCommentTag(tags,"endpointResponseHeader",((StringLiteralExpr) call.getArgument(0)).asString());
+                                                if (tag != null) {
+                                                    String content = tag.getContent().toText().strip();
+                                                    endpoint.addResponseHeader(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                                                } else {
+                                                    endpoint.addResponseHeader(new Parameter(call.getArgument(0).toString(), ""));
+                                                }
+                                            }
+                                        }
+                                        break;
+                                    case "queryParam":
+                                        if (call.getArgument(0) instanceof StringLiteralExpr) {
+                                            JavadocBlockTag tag = getCommentTag(tags,"endpointQueryParam",((StringLiteralExpr) call.getArgument(0)).asString());
+                                            if (tag != null) {
+                                                String content = tag.getContent().toText().strip();
+                                                endpoint.addQueryParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                                            } else {
+                                                endpoint.addQueryParam(new Parameter(call.getArgument(0).toString(), ""));
+                                            }
+                                        }
+                                        break;
+                                    case "html":
+                                        endpoint.setResponseType("html");
+                                        break;
+                                    case "status":
+                                        if (call.getArgument(0) instanceof IntegerLiteralExpr) {
+                                            JavadocBlockTag tag = getCommentTag(tags,"endpointStatus",((IntegerLiteralExpr) call.getArgument(0)).toString());
+                                            if (tag != null) {
+                                                String content = tag.getContent().toText().strip();
+                                                endpoint.addResponseStatus(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                                            } else {
+                                                endpoint.addResponseStatus(new Parameter(call.getArgument(0).toString(), ""));
+                                            }
+                                        }
+                                        System.out.println(call.getArgument(0).getClass().getSimpleName());
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+                System.out.println(stmt.getClass().getSimpleName());
+            }
+        }
 
+    }
+
+    private JavadocBlockTag getCommentTag(List<JavadocBlockTag> tags, String type) {
+        JavadocBlockTag returnTag = null;
+        for (JavadocBlockTag tag : tags) {
+            if (tag.getTagName().equals(type)) {
+                
+                returnTag = tag;
+            }
+        } 
+        if (returnTag != null) {
+            tags.remove(returnTag);
+        }
+        return returnTag;
+    }
+
+    private JavadocBlockTag getCommentTag(List<JavadocBlockTag> tags, String type, String param) {
+        JavadocBlockTag returnTag = null;
+        for (JavadocBlockTag tag : tags) {
+            String content = tag.getContent().toText().strip();
+            String tagParam = content.indexOf(" ") >= 0 ? content.substring(0, content.indexOf(" ")) : "";
+            if (tag.getTagName().equals(type) && tagParam.equals(param)) {
+                returnTag = tag;
+            }
+        }
+        if (returnTag != null) {
+            tags.remove(returnTag);
+        } 
+        return returnTag;
     }
 
     private Javadoc parseJavadoc(JavadocComment comment) {
