@@ -64,6 +64,57 @@ public class Endpoint {
    public void addResponseHeader(Parameter param) {
       this.responseHeaders.add(param);
    }
+
+
+   public int pathParamLength() {
+      return this.pathParams.size();
+   }
+   
+   public int queryParamLength() {
+      return this.queryParams.size();
+   }
+   
+   public int formParamLength() {
+      return this.formParams.size();
+   }
+
+   public int headerParamLength() {
+      return this.headerParams.size();
+   }
+
+   public int responseStatusLength() {
+      return this.responseStatuses.size();
+   }
+
+   public int responseHeaderLength() {
+      return this.responseHeaders.size();
+   }
+
+
+   public Parameter pathParam(int i) {
+      return this.pathParams.get(i);
+   }
+   
+   public Parameter queryParam(int i) {
+      return this.queryParams.get(i);
+   }
+   
+   public Parameter formParam(int i) {
+      return this.formParams.get(i);
+   }
+
+   public Parameter headerParam(int i) {
+      return this.headerParams.get(i);
+   }
+
+   public Parameter responseStatus(int i) {
+      return this.responseStatuses.get(i);
+   }
+
+   public Parameter responseHeader(int i) {
+      return this.responseHeaders.get(i);
+   }
+
    
    public String getType() {
       if (this.type != null) {

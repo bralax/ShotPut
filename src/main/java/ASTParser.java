@@ -36,6 +36,7 @@ import org.apache.commons.cli.Options;
 import java.io.File;
 import java.io.IOError;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -120,7 +121,11 @@ public class ASTParser {
                 File file = new File(classPath);
                 File out = new File(outDir);
                 if (file.exists() && out.exists()) {
-                    new ASTParser(file, css, excel, html, out).start();
+                    if (out.isDirectory()) {
+                        new ASTParser(file, css, excel, html, out).start();
+                    } else {
+                        System.out.println("The output directory must be a folder");
+                    }
                 }
                 else {
                     System.out.println("The classpath and output directory have to be valid locations");
@@ -137,7 +142,84 @@ public class ASTParser {
     }
 
     private void generateExcel() {
+        //System.out.println(this.out.getAbsolutePath());
+        try {
+        PrintWriter printWriter = new PrintWriter(this.out.getAbsolutePath() + "/endpoints.csv");
+        printWriter.print("Index,Type,Endpoint,Response Type,Description,Path Parameter, Path Parameter Description, Query Parameter, Query Parameter Description,");
+        printWriter.print("Form Parameter, Form Parameter Description, Request Header, Request Header Description, Response Header, Response Header Description,");
+        printWriter.println("Response Status,Response Status Description");
+        for (int i = 0; i < this.endpoints.size(); i++) {
+            Endpoint endpoint = endpoints.get(i);
+            int max = maxLength(endpoint.pathParamLength(), endpoint.formParamLength(), endpoint.headerParamLength(), endpoint.queryParamLength(), endpoint.responseHeaderLength(), endpoint.responseStatusLength());
+            if (max > 0) {
+                for (int j = 0; j < max; j++) {
+                    if (j == 0) {
+                        printWriter.print((i + 1) + "," + endpoint.getType() + "," + endpoint.getEndpoint() + "," +  endpoint.getResponseType() + "," + endpoint.getDescription() + ",");
+                    } else {
+                        printWriter.print(",,,,,");
+                    }
+                    if (j < endpoint.pathParamLength()) {
+                        Parameter param = endpoint.pathParam(j);
+                        printWriter.print(param.getName() + "," + param.getDescription() + ",");
+                    } else {
+                        printWriter.print(",,");
+                    }
 
+                    if (j < endpoint.queryParamLength()) {
+                        Parameter param = endpoint.queryParam(j);
+                        printWriter.print(param.getName() + "," + param.getDescription() + ",");
+                    } else {
+                        printWriter.print(",,");
+                    }
+
+                    if (j < endpoint.formParamLength()) {
+                        Parameter param = endpoint.formParam(j);
+                        printWriter.print(param.getName() + "," + param.getDescription() + ",");
+                    } else {
+                        printWriter.print(",,");
+                    }
+
+                    if (j < endpoint.headerParamLength()) {
+                        Parameter param = endpoint.headerParam(j);
+                        printWriter.print(param.getName() + "," + param.getDescription() + ",");
+                    } else {
+                        printWriter.print(",,");
+                    }
+
+                    if (j < endpoint.responseHeaderLength()) {
+                        Parameter param = endpoint.responseHeader(j);
+                        printWriter.print(param.getName() + "," + param.getDescription() + ",");
+                    } else {
+                        printWriter.print(",,");
+                    }
+
+                    if (j < endpoint.responseStatusLength()) {
+                        Parameter param = endpoint.responseStatus(j);
+                        printWriter.print(param.getName() + "," + param.getDescription() + ",");
+                    } else {
+                        printWriter.print(",,");
+                    }
+                    printWriter.println("");
+                }
+            } else {
+                printWriter.println((i + 1) + "," + endpoint.getType() + "," + endpoint.getEndpoint() + "," +  endpoint.getResponseType() + "," + endpoint.getDescription() + ",");
+            }
+        }
+        printWriter.flush();
+        printWriter.close();
+        } catch (IOException exception) {
+            System.err.println("Failed to generate CSV!");
+        }
+    }
+
+    private int maxLength(int... vals) {
+        int max = 0; // the minimum possible length is 0
+        for (int val: vals) {
+            if (val > max) {
+                max = val;
+            }
+        }
+        return max;
     }
 
     private void generateHTML() {
