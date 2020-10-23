@@ -1,4 +1,5 @@
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -25,6 +26,13 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSol
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+
 import java.io.File;
 import java.io.IOError;
 import java.io.IOException;
@@ -33,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Scanner;
 
 import com.github.javaparser.JavaParser;
@@ -40,11 +49,23 @@ import com.github.javaparser.JavaParser;
 public class ASTParser {
     private List<Endpoint> endpoints;
     private File file;
+    private File css;
+    private boolean excel;
+    private boolean html;
+    private File out;
 
-    private ASTParser(File file) {
+    private ASTParser(File file, String css, boolean excel, boolean html, File out) {
         this.endpoints = new ArrayList<>();
         this.file = file;
-        
+        this.css = new File(css);
+        this.out = out;
+        if (!excel && !html) {
+            this.excel = true;
+            this.html = true;
+        } else {
+            this.excel = excel;
+            this.html = html;
+        }
     }
 
     private void start() throws IOException {
@@ -53,16 +74,74 @@ public class ASTParser {
         solver.add(new JarTypeSolver("src/main/resources/javalin-3.9.1.jar"));
         JavaSymbolSolver symbolSolver = new JavaSymbolSolver(solver);
         JavaParser.getStaticConfiguration().setSymbolResolver(symbolSolver);
-        CompilationUnit unit =  JavaParser.parse(this.file.toPath());
-        new VisitAll().visitPreOrder(unit);
+        this.parse(this.file);
+        /*CompilationUnit unit =  JavaParser.parse(this.file.toPath());
+        new VisitAll().visitPreOrder(unit);*/
         System.out.println(endpoints);
+        if (this.excel) {
+            this.generateExcel();
+        }
+        if (this.html) {
+            this.generateHTML();
+        }
+    }
+
+    private void parse(File f) throws IOException{
+        if (f.isDirectory()) {
+            for (File file : f.listFiles()) {
+                this.parse(file);
+            }
+        } else if (f.getName().endsWith(".java")) {
+            CompilationUnit unit =  JavaParser.parse(f.toPath());
+            new VisitAll().visitPreOrder(unit);
+        }
     }
 
     public static void main(String[] args) throws Exception {
-        String filename = args[0];
-        File file = new File(filename);
-        new ASTParser(file).start();
+        Options options = new Options();
+        options.addOption(Option.builder("s").longOpt("css").desc("The css file to be used on the html").hasArg().required(false).build());
+        options.addOption(Option.builder("cp").longOpt("classpath").desc("The files to parse (Required)").hasArg().required(true).build());
+        options.addOption(Option.builder("o").longOpt("outdir").desc("The place to put the generated files (Required)").hasArg().required(true).build());
+        options.addOption(Option.builder("x").longOpt("excel").desc("Flag to generate excel file. If this flag and -h are not set both will be generated").required(false).build());
+        options.addOption(Option.builder("h").longOpt("html").desc("Flag to generate html file. If this flag and -h are not set both will be generated").required(false).build());
+        options.addOption(Option.builder("?").longOpt("help").desc("Print the Help Menu").required(false).build());
+        CommandLineParser parser = new DefaultParser();
+        try {
+            CommandLine commandLine = parser.parse(options, args);
+            if (commandLine.hasOption("help")) {
+                HelpFormatter formatter = new HelpFormatter();
+                formatter.printHelp("javalin-doc",options);
+            } else {
+                String outDir = commandLine.getOptionValue("o");
+                String classPath = commandLine.getOptionValue("cp");
+                String css = commandLine.getOptionValue("s", "test.css");
+                boolean excel = commandLine.hasOption("x");
+                boolean html = commandLine.hasOption("h");
+                File file = new File(classPath);
+                File out = new File(outDir);
+                if (file.exists() && out.exists()) {
+                    new ASTParser(file, css, excel, html, out).start();
+                }
+                else {
+                    System.out.println("The classpath and output directory have to be valid locations");
+                }
+            }
+        } catch (org.apache.commons.cli.ParseException exception) {
+            
+            System.err.println(exception.getMessage());
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("javalin-doc",options);
+        }
         
+        
+    }
+
+    private void generateExcel() {
+
+    }
+
+    private void generateHTML() {
+
     }
 
     private class VisitAll extends TreeVisitor {
