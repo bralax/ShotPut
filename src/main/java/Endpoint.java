@@ -7,8 +7,11 @@ public class Endpoint {
    private List<Parameter> pathParams;
    private List<Parameter> queryParams;
    private List<Parameter> formParams;
+   private List<Parameter> headerParams;
+   private List<Parameter> responseStatuses;
    private String responseType;
    private String responseDescription;
+
    private String description;
    
    public Endpoint() {
@@ -19,6 +22,8 @@ public class Endpoint {
       this.pathParams = new ArrayList<>();
       this.queryParams = new ArrayList<>();
       this.formParams = new ArrayList<>();
+      this.headerParams = new ArrayList<>();
+      this.responseStatuses = new ArrayList<>();
    }
    
    public Endpoint(Type type, String endpoint) {
@@ -29,6 +34,8 @@ public class Endpoint {
       this.pathParams = new ArrayList<>();
       this.queryParams = new ArrayList<>();
       this.formParams = new ArrayList<>();
+      this.headerParams = new ArrayList<>();
+      this.responseStatuses = new ArrayList<>();
    }
    
    public void addPathParam(Parameter param) {
@@ -41,6 +48,14 @@ public class Endpoint {
    
    public void addFormParam(Parameter param) {
       this.formParams.add(param);
+   }
+
+   public void addHeaderParam(Parameter param) {
+      this.headerParams.add(param);
+   }
+
+   public void addResponseStatus(Parameter param) {
+      this.responseStatuses.add(param);
    }
    
    public String getType() {
@@ -79,11 +94,37 @@ public class Endpoint {
       this.description = description;
    }
    
-   public String setDescription() {
+   public String getDescription() {
       return this.description;
    }
 
+   public void setResponseDescription(String description) {
+      this.responseDescription = description;
+   }
+   
+   public String getResponseDescription() {
+      return this.responseDescription;
+   }
 
+   public String toString() {
+      return "{endpoint : {type:"+this.type +  "\n" +
+      "Endpoint: " + this.endpoint  + "\n" +
+      "Response Type: " + this.responseType + "\n" + 
+      "Endpoint Description: " + this.description  + "\n" +
+      "Path Parameters: " + this.pathParams + "\n" + 
+      "Query Parameters: " + this.queryParams + "\n" +
+      "Form Parameters" + this.formParams + "\n" + 
+      "Request Headers" + this.headerParams + "\n" + 
+      "Response Status Codes: " + this.responseStatuses + "}";
+   }
+
+   public boolean equals(Object a) {
+      if (a instanceof Endpoint) {
+         Endpoint other = (Endpoint) a;
+         return this.type.equals(other.type) && this.endpoint.equals(other.endpoint);
+      }
+      return false;
+   }
 
 
    public enum Type {

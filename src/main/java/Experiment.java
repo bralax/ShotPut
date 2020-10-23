@@ -12,6 +12,7 @@ import jdk.javadoc.doclet.Reporter;
 import javax.lang.model.SourceVersion;
 import com.sun.source.util.DocTrees;
 import javax.lang.model.util.Elements;
+import javax.tools.JavaFileManager;
 import javax.lang.model.element.ElementKind;
 import com.sun.source.doctree.DocCommentTree;
 import com.sun.source.doctree.DocTree;
@@ -53,7 +54,7 @@ import com.sun.source.util.DocTreeScanner;
  * @see <a href="{@docRoot}/../specs/javadoc/doc-comment-spec.html">
  *      Documentation Comment Specification for the Standard Doclet</a>
  */
-public class JavalinDoc implements Doclet {
+public class Experiment implements Doclet {
 
    private DocTrees treeUtils;
    private List<Endpoint> endpoints;
@@ -64,7 +65,7 @@ public class JavalinDoc implements Doclet {
      * Creates an instance of the standard doclet, used to generate HTML-formatted
      * documentation.
      */
-    public JavalinDoc() {
+    public Experiment() {
        //htmlDoclet = new HtmlDoclet(this);
     }
 
@@ -92,11 +93,13 @@ public class JavalinDoc implements Doclet {
 
     @Override
     public boolean run(DocletEnvironment docEnv) {
-      treeUtils = docEnv.getDocTrees();
+      JavaFileManager manager =  docEnv.getJavaFileManager();
+      //manager.
+      /*treeUtils = docEnv.getDocTrees();
       this.endpoints = new ArrayList<>();
       ShowElements se = new ShowElements(System.out);
       se.show(docEnv.getIncludedElements());
-      System.out.println(endpoints);
+      //System.out.println(endpoints);
        /*DocTrees trees = docEnv.getDocTrees();
        Elements elements = docEnv.getElementUtils();
        Set<? extends Element> elems = docEnv.getSpecifiedElements();
@@ -141,9 +144,9 @@ public class JavalinDoc implements Doclet {
  
         @Override
         public Void scan(Element e, Integer depth) {
-            DocCommentTree dcTree = treeUtils.getDocCommentTree(e);
-            String indent = "  ".repeat(depth);
-            if (dcTree != null && e.getKind().equals(ElementKind.METHOD)) {
+            //DocCommentTree dcTree = treeUtils.getDocCommentTree(e);
+            this.out.println(e.getEnclosedElements());
+            /*if (dcTree != null && e.getKind().equals(ElementKind.METHOD)) {
                 List<? extends DocTree> blocks = dcTree.getBlockTags();
                 if (this.isEndpoint(blocks)) {
                   Endpoint endpoint = new Endpoint();
@@ -153,7 +156,7 @@ public class JavalinDoc implements Doclet {
                   }
                   //out.println(e.getKind() + "\t" + e.getKind().equals(ElementKind.METHOD));
                 }
-            }
+            }*/
             return super.scan(e, depth + 1);
         }
         

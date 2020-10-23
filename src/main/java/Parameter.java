@@ -23,4 +23,8 @@ public class Parameter {
        this.description = description;
    }
 
+   public String toString() {
+      return "{Name: "+this.name+", Description: "+this.description+"}";
+   }
+
 }

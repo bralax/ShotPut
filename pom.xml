@@ -19,6 +19,16 @@
                 <version>4.12</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>com.github.javaparser</groupId>
+                <artifactId>java-symbol-solver-core</artifactId>
+                <version>LATEST</version>
+            </dependency>
+            <dependency>
+                <groupId>io.javalin</groupId>
+                <artifactId>javalin</artifactId>
+                <version>3.11.0</version>
+            </dependency>
         </dependencies>
     <build>
         <pluginManagement>
