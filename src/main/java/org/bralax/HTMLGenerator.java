@@ -3,6 +3,7 @@ package org.bralax;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -23,12 +24,27 @@ public class HTMLGenerator {
         } else {
             source = new FileInputStream(css);
         }
-        FileOutputStream outputStream = new FileOutputStream(new File(htmlFolder, "style.css"));
+        FileOutputStream outputStream = new FileOutputStream(new File(htmlFolder, "styles.css"));
         copyStream(source, outputStream);
         HtmlTree tree = new HtmlTree(TagName.HTML);
+        tree.add(writeHead());
+        tree.add(writeBody(endpoints));
+        FileWriter writer = new FileWriter(new File(htmlFolder, "index.html"));
+        tree.write(writer, false);
+        writer.close();
     }
 
+    private static HtmlTree writeHead() {
+        HtmlTree tree = new HtmlTree(TagName.HEAD);
+        tree.add(new HtmlTree(TagName.TITLE).add("Endpoint Documentation"));
+        tree.add(new HtmlTree(TagName.LINK).put(HtmlAttr.HREF, "./styles.css").put(HtmlAttr.REL, "stylesheet").put(HtmlAttr.TYPE, "text/css"));
+        return tree;
+    }
 
+    private static HtmlTree writeBody(List<Endpoint> endpoints) {
+        HtmlTree tree = new HtmlTree(TagName.BODY);
+        return tree;
+    }
 
 
     private static void copyStream(InputStream source, OutputStream outputStream) throws IOException {
