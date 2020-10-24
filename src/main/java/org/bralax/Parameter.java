@@ -1,3 +1,5 @@
+package org.bralax;
+
 public class Parameter {
    private String name;
    private String description;

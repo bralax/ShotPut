@@ -1,9 +1,9 @@
+package org.bralax;
+
 import com.github.javaparser.JavaParser;
-import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.IntegerLiteralExpr;
@@ -34,18 +34,17 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import java.io.File;
-import java.io.IOError;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.Scanner;
 
-import com.github.javaparser.JavaParser;
 
 public class ASTParser {
     private List<Endpoint> endpoints;
@@ -154,55 +153,55 @@ public class ASTParser {
             if (max > 0) {
                 for (int j = 0; j < max; j++) {
                     if (j == 0) {
-                        printWriter.print((i + 1) + "," + endpoint.getType() + "," + endpoint.getEndpoint() + "," +  endpoint.getResponseType() + "," + endpoint.getDescription() + ",");
+                        printWriter.print((i + 1) + "," + prepForCSV(endpoint.getType()) + "," + prepForCSV(endpoint.getEndpoint()) + "," +  prepForCSV(endpoint.getResponseType()) + "," + prepForCSV(endpoint.getDescription()) + ",");
                     } else {
                         printWriter.print(",,,,,");
                     }
                     if (j < endpoint.pathParamLength()) {
                         Parameter param = endpoint.pathParam(j);
-                        printWriter.print(param.getName() + "," + param.getDescription() + ",");
+                        printWriter.print(prepForCSV(param.getName()) + "," + prepForCSV(param.getDescription()) + ",");
                     } else {
                         printWriter.print(",,");
                     }
 
                     if (j < endpoint.queryParamLength()) {
                         Parameter param = endpoint.queryParam(j);
-                        printWriter.print(param.getName() + "," + param.getDescription() + ",");
+                        printWriter.print(prepForCSV(param.getName()) + "," + prepForCSV(param.getDescription()) + ",");
                     } else {
                         printWriter.print(",,");
                     }
 
                     if (j < endpoint.formParamLength()) {
                         Parameter param = endpoint.formParam(j);
-                        printWriter.print(param.getName() + "," + param.getDescription() + ",");
+                        printWriter.print(prepForCSV(param.getName()) + "," + prepForCSV(param.getDescription()) + ",");
                     } else {
                         printWriter.print(",,");
                     }
 
                     if (j < endpoint.headerParamLength()) {
                         Parameter param = endpoint.headerParam(j);
-                        printWriter.print(param.getName() + "," + param.getDescription() + ",");
+                        printWriter.print(prepForCSV(param.getName()) + "," + prepForCSV(param.getDescription()) + ",");
                     } else {
                         printWriter.print(",,");
                     }
 
                     if (j < endpoint.responseHeaderLength()) {
                         Parameter param = endpoint.responseHeader(j);
-                        printWriter.print(param.getName() + "," + param.getDescription() + ",");
+                        printWriter.print(prepForCSV(param.getName()) + "," + prepForCSV(param.getDescription()) + ",");
                     } else {
                         printWriter.print(",,");
                     }
 
                     if (j < endpoint.responseStatusLength()) {
                         Parameter param = endpoint.responseStatus(j);
-                        printWriter.print(param.getName() + "," + param.getDescription() + ",");
+                        printWriter.print(prepForCSV(param.getName()) + "," + prepForCSV(param.getDescription()) + ",");
                     } else {
                         printWriter.print(",,");
                     }
                     printWriter.println("");
                 }
             } else {
-                printWriter.println((i + 1) + "," + endpoint.getType() + "," + endpoint.getEndpoint() + "," +  endpoint.getResponseType() + "," + endpoint.getDescription() + ",");
+                printWriter.println((i + 1) + "," + prepForCSV(endpoint.getType()) + "," + prepForCSV(endpoint.getEndpoint()) + "," +  prepForCSV(endpoint.getResponseType()) + "," + prepForCSV(endpoint.getDescription()) + ",");
             }
         }
         printWriter.flush();
@@ -222,14 +221,20 @@ public class ASTParser {
         return max;
     }
 
-    private void generateHTML() {
+    private String prepForCSV(String original) {
+        original = original.strip();
+        original = original.replace("\n", " ");
+        original = original.replace(",", " ");
+        return original;
+    }
 
+    private void generateHTML() throws IOException{
+        HTMLGenerator.generateHTML(css, out, endpoints);
     }
 
     private class VisitAll extends TreeVisitor {
         @Override
         public void process(Node node) {
-            // TODO Auto-generated method stub
             if (node instanceof ExpressionStmt) {
                 ExpressionStmt stmt = (ExpressionStmt) node;
                 if (stmt.getExpression() instanceof MethodCallExpr) {
@@ -308,12 +313,6 @@ public class ASTParser {
             }*/
             //System.out.println(node.getClass().getSimpleName() + "\t" + node);  
         } 
-    }
-
-    private void parseRemainingComment(List<JavadocBlockTag> tags) {
-        for (JavadocBlockTag tag : tags) {
-            switch
-        }
     }
 
     private void parseLambdaExpression(LambdaExpr expr, Endpoint endpoint, List<JavadocBlockTag> tags) {

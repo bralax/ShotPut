@@ -1,3 +1,5 @@
+package org.bralax;
+
 import java.util.Locale;
 import java.util.List;
 import java.util.Set;
@@ -9,16 +11,11 @@ import javax.lang.model.SourceVersion;
 import jdk.javadoc.doclet.Doclet;
 import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
-import javax.lang.model.SourceVersion;
 import com.sun.source.util.DocTrees;
-import javax.lang.model.util.Elements;
-import javax.tools.JavaFileManager;
 import javax.lang.model.element.ElementKind;
 import com.sun.source.doctree.DocCommentTree;
 import com.sun.source.doctree.DocTree;
 import com.sun.source.doctree.UnknownBlockTagTree;
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.Tree;
 import javax.lang.model.util.ElementScanner9;
 import java.io.PrintStream;
 import com.sun.source.util.DocTreeScanner;
@@ -54,7 +51,7 @@ import com.sun.source.util.DocTreeScanner;
  * @see <a href="{@docRoot}/../specs/javadoc/doc-comment-spec.html">
  *      Documentation Comment Specification for the Standard Doclet</a>
  */
-public class Experiment implements Doclet {
+public class JavalinDoc implements Doclet {
 
    private DocTrees treeUtils;
    private List<Endpoint> endpoints;
@@ -65,7 +62,7 @@ public class Experiment implements Doclet {
      * Creates an instance of the standard doclet, used to generate HTML-formatted
      * documentation.
      */
-    public Experiment() {
+    public JavalinDoc() {
        //htmlDoclet = new HtmlDoclet(this);
     }
 
@@ -93,13 +90,11 @@ public class Experiment implements Doclet {
 
     @Override
     public boolean run(DocletEnvironment docEnv) {
-      JavaFileManager manager =  docEnv.getJavaFileManager();
-      //manager.
-      /*treeUtils = docEnv.getDocTrees();
+      treeUtils = docEnv.getDocTrees();
       this.endpoints = new ArrayList<>();
       ShowElements se = new ShowElements(System.out);
       se.show(docEnv.getIncludedElements());
-      //System.out.println(endpoints);
+      System.out.println(endpoints);
        /*DocTrees trees = docEnv.getDocTrees();
        Elements elements = docEnv.getElementUtils();
        Set<? extends Element> elems = docEnv.getSpecifiedElements();
@@ -144,9 +139,8 @@ public class Experiment implements Doclet {
  
         @Override
         public Void scan(Element e, Integer depth) {
-            //DocCommentTree dcTree = treeUtils.getDocCommentTree(e);
-            this.out.println(e.getEnclosedElements());
-            /*if (dcTree != null && e.getKind().equals(ElementKind.METHOD)) {
+            DocCommentTree dcTree = treeUtils.getDocCommentTree(e);
+            if (dcTree != null && e.getKind().equals(ElementKind.METHOD)) {
                 List<? extends DocTree> blocks = dcTree.getBlockTags();
                 if (this.isEndpoint(blocks)) {
                   Endpoint endpoint = new Endpoint();
@@ -156,7 +150,7 @@ public class Experiment implements Doclet {
                   }
                   //out.println(e.getKind() + "\t" + e.getKind().equals(ElementKind.METHOD));
                 }
-            }*/
+            }
             return super.scan(e, depth + 1);
         }
         

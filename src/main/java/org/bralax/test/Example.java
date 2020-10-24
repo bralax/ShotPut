@@ -1,3 +1,4 @@
+package org.bralax.test;
 import io.javalin.Javalin;
 
 public class Example {
