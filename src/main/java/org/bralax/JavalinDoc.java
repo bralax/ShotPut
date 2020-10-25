@@ -261,12 +261,13 @@ public class JavalinDoc {
                             endpoints.add(endpoint);
                         }
     
-                        //getSymbol(((NameExpr) exp.get())).equals('io.javalin.Javalin') -> is a endpoint
+                        
                     }
+                    //NOTE:
                     //call.getNameAsString() -> name of the method
                     //call.getArguments() -> the parameters passed to the method
                     //call.getScope() -> the caller
-                    //
+                    //getSymbol(((NameExpr) exp.get())).equals('io.javalin.Javalin') -> is a endpoint
     
                 }
             }
@@ -334,13 +335,11 @@ public class JavalinDoc {
 
     private void parseLambdaStatements(NodeList<Statement> stmts, Endpoint endpoint, List<JavadocBlockTag> tags, String ctx) {
         for(Statement stmt: stmts) {
-            //System.out.println(stmt  + "\t" + stmt.getClass().getSimpleName());
             if (stmt instanceof ExpressionStmt) {
                 ExpressionStmt stm = (ExpressionStmt) stmt;
                 parseLambdaExpressionStmt(endpoint, stm, tags, ctx);
             } else if (stmt instanceof NodeWithBody) {
                 Statement bod = ((NodeWithBody)stmt).getBody();
-                //System.out.println(bod.getClass().getSimpleName() + "\t" + bod);
                 if (bod instanceof BlockStmt) {
                     NodeList<Statement> newStmts = ((BlockStmt) bod).getStatements();
                     parseLambdaStatements(newStmts, endpoint, tags, ctx);
