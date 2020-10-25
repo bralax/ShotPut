@@ -88,7 +88,7 @@
                     <configuration>
                         <archive>
                         <manifest>
-                            <mainClass>org.bralax.ASTParser</mainClass>
+                            <mainClass>org.bralax.JavalinDoc</mainClass>
                         </manifest>
                         </archive>
                     </configuration>

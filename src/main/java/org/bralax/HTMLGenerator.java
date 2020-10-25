@@ -9,9 +9,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Comparator;
 import java.util.List;
-
+import java.util.Scanner;
 
 import org.bralax.html.*;
+
 
 public class HTMLGenerator {
     
@@ -94,7 +95,63 @@ public class HTMLGenerator {
     private static HtmlTree generateEndpointDetails(Endpoint endpoint) {
         HtmlTree endpointBox = HtmlTree.DIV(HtmlStyle.endpointBlock);
         endpointBox.add(new HtmlTree(TagName.H4).add(endpoint.getEndpoint()));
-        System.out.println(endpointBox + "\t" + endpointBox.isEmpty() + "\t" + endpointBox.isValid());
+        endpointBox.add(new HtmlTree(TagName.PRE).add(endpoint.getType() + " " + endpoint.getEndpoint()));
+        HtmlTree description = new HtmlTree(TagName.DIV).setStyle(HtmlStyle.description);
+        Scanner scn = new Scanner(endpoint.getDescription());
+        while(scn.hasNextLine()) {
+            description.add(HtmlTree.P(new StringContent(scn.nextLine())));
+        }
+        endpointBox.add(description);
+        HtmlTree descriptionList = HtmlTree.DL(HtmlStyle.detailsList);
+        descriptionList.add(HtmlTree.DT(new StringContent("Response Type:")));
+        descriptionList.add(HtmlTree.DD(new StringContent(endpoint.getResponseType())));
+        if (endpoint.pathParamLength() > 0) {
+            descriptionList.add(HtmlTree.DT(new StringContent("Path Parameters:")));
+            for (int i = 0; i < endpoint.pathParamLength(); i++) {
+                Parameter param = endpoint.pathParam(i);
+                descriptionList.add(HtmlTree.DD(new HtmlTree(TagName.CODE).add(param.getName())).add(" - " + param.getDescription()));
+            }
+        }
+        if (endpoint.queryParamLength() > 0) {
+            descriptionList.add(HtmlTree.DT(new StringContent("Query Parameters:")));
+            for (int i = 0; i < endpoint.queryParamLength(); i++) {
+                Parameter param = endpoint.queryParam(i);
+                descriptionList.add(HtmlTree.DD(new HtmlTree(TagName.CODE).add(param.getName())).add(" - " + param.getDescription()));
+            }
+        }
+        if (endpoint.formParamLength() > 0) {
+            descriptionList.add(HtmlTree.DT(new StringContent("Form Parameters:")));
+            for (int i = 0; i < endpoint.formParamLength(); i++) {
+                Parameter param = endpoint.formParam(i);
+                descriptionList.add(HtmlTree.DD(new HtmlTree(TagName.CODE).add(param.getName())).add(" - " + param.getDescription()));
+            }
+        }
+        if (endpoint.headerParamLength() > 0) {
+            descriptionList.add(HtmlTree.DT(new StringContent("Header Parameters:")));
+            for (int i = 0; i < endpoint.headerParamLength(); i++) {
+                Parameter param = endpoint.headerParam(i);
+                descriptionList.add(HtmlTree.DD(new HtmlTree(TagName.CODE).add(param.getName())).add(" - " + param.getDescription()));
+            }
+        }
+
+        if (endpoint.responseHeaderLength() > 0) {
+            descriptionList.add(HtmlTree.DT(new StringContent("Response Headers:")));
+            for (int i = 0; i < endpoint.responseHeaderLength(); i++) {
+                Parameter param = endpoint.responseHeader(i);
+                descriptionList.add(HtmlTree.DD(new HtmlTree(TagName.CODE).add(param.getName())).add(" - " + param.getDescription()));
+            }
+        }
+
+        if (endpoint.responseStatusLength() > 0) {
+            descriptionList.add(HtmlTree.DT(new StringContent("Response Statuses:")));
+            for (int i = 0; i < endpoint.responseStatusLength(); i++) {
+                Parameter param = endpoint.responseStatus(i);
+                descriptionList.add(HtmlTree.DD(new HtmlTree(TagName.CODE).add(param.getName())).add(" - " + param.getDescription()));
+            }
+        }
+
+
+        endpointBox.add(descriptionList);
         return endpointBox;
     }
 
