@@ -34,10 +34,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,8 +73,8 @@ public class ASTParser {
         JavaParser.getStaticConfiguration().setSymbolResolver(symbolSolver);
         this.parse(this.file);
         /*CompilationUnit unit =  JavaParser.parse(this.file.toPath());
-        new VisitAll().visitPreOrder(unit);*/
-        System.out.println(endpoints);
+        new VisitAll().visitPreOrder(unit);
+        System.out.println(endpoints);*/
         if (this.excel) {
             this.generateExcel();
         }
@@ -242,16 +239,14 @@ public class ASTParser {
                     MethodCallExpr call = (MethodCallExpr) stmt.getExpression();
                     Optional<Expression> exp = call.getScope();
                     if (exp.isPresent() && exp.get() instanceof NameExpr) {
-                        //System.out.println("'" + getSymbol(((NameExpr) exp.get())) + "'");//.resolve().getType());
                         if (getSymbol((NameExpr) exp.get()).equals("io.javalin.Javalin") && isValidMethod(call.getNameAsString()) ) {
-                            System.out.println("Is an endpoint!");
+                            //Is an endpoint
                             Endpoint endpoint = new Endpoint();
                             if (stmt.getComment().isPresent() && stmt.getComment().get() instanceof JavadocComment) {
                                 JavadocComment comment = (JavadocComment) stmt.getComment().get();
                                 Javadoc javadoc = parseJavadoc(comment);
                                 List<JavadocBlockTag> tags = new ArrayList<>();
                                 tags.addAll(javadoc.getBlockTags());
-                                System.out.println(tags);
                                 endpoint.setType(Endpoint.Type.valueOf(call.getNameAsString().toUpperCase()));
                                 getCommentTag(tags, "endpointType");
                                 if (call.getArgument(0) instanceof StringLiteralExpr) {
@@ -293,6 +288,9 @@ public class ASTParser {
                                         case "endpointStatus":
                                             endpoint.addResponseStatus(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
                                             break;
+                                        case "endpointResponseType":
+                                            endpoint.setResponseType(content);
+                                            break;
                                     }
                                 }
                                 endpoint.setDescription(javadoc.getDescription().toText());
@@ -326,9 +324,7 @@ public class ASTParser {
                         MethodCallExpr call = (MethodCallExpr) stm.getExpression();
                         Optional<Expression> exp = call.getScope();
                         if (exp.isPresent() && exp.get() instanceof NameExpr) {
-                            //System.out.println(getSymbol((NameExpr) exp.get()));
                             if (getSymbol((NameExpr) exp.get()).equals("? super io.javalin.http.Context")) {
-                                System.out.println(call.getNameAsString());
                                 switch(call.getNameAsString()) {
                                     case "json":
                                         endpoint.setResponseType("json");
@@ -402,14 +398,12 @@ public class ASTParser {
                                                 endpoint.addResponseStatus(new Parameter(call.getArgument(0).toString(), ""));
                                             }
                                         }
-                                        System.out.println(call.getArgument(0).getClass().getSimpleName());
                                         break;
                                 }
                             }
                         }
                     }
                 }
-                System.out.println(stmt.getClass().getSimpleName());
             }
         }
 

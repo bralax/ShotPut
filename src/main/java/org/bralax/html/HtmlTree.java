@@ -182,6 +182,7 @@ public class HtmlTree extends Content {
                 this.content = new ArrayList<>();
             this.content.add(content);
         }
+        //System.out.println("Content:" + content + "\n {" + this.content + "}");
         return this;
     }
 

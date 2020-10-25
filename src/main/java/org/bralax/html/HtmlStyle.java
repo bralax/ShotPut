@@ -687,8 +687,10 @@ public enum HtmlStyle {
     /**
      * The class of the {@code body} element for the page for the class hierarchy.
      */
-    treePage;
+    treePage,
     //</editor-fold>
+
+    endpointBlock;
 
     private final String cssName;
 
