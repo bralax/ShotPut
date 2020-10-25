@@ -11,8 +11,11 @@ import com.github.javaparser.ast.expr.LambdaExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.nodeTypes.NodeWithBody;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.visitor.TreeVisitor;
 import com.github.javaparser.javadoc.Javadoc;
@@ -33,6 +36,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
+import io.javalin.Javalin;
+import sun.tools.tree.IfStatement;
 
 import java.io.File;
 import java.io.IOException;
@@ -248,53 +253,10 @@ public class JavalinDoc {
                                 Javadoc javadoc = parseJavadoc(comment);
                                 List<JavadocBlockTag> tags = new ArrayList<>();
                                 tags.addAll(javadoc.getBlockTags());
-                                endpoint.setType(Endpoint.Type.valueOf(call.getNameAsString().toUpperCase()));
-                                getCommentTag(tags, "endpointType");
-                                if (call.getArgument(0) instanceof StringLiteralExpr) {
-                                    endpoint.setEndpoint(((StringLiteralExpr)call.getArgument(0)).asString());
-                                    getCommentTag(tags, "endpoint");
-                                } else {
-                                    JavadocBlockTag tag = getCommentTag(tags, "endoint");
-                                    if (tag != null) {
-                                        endpoint.setEndpoint(tag.getContent().toText().strip());
-                                    }
-                                }
-                                if (call.getArgument(1) instanceof LambdaExpr) {
-                                    parseLambdaExpression((LambdaExpr)call.getArgument(1), endpoint, tags);
-                                }
-                                for (JavadocBlockTag tag: tags) {
-                                    String content = tag.getContent().toText().strip();
-                                    switch (tag.getTagName()) {
-                                        case "endpoint":
-                                            endpoint.setEndpoint(content);
-                                            break;
-                                        case "endpointType":
-                                            endpoint.setType(Endpoint.Type.valueOf(content));
-                                            break;
-                                        case "endpointQueryParam":
-                                            endpoint.addQueryParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
-                                            break;
-                                        case "endpointPathParam":
-                                            endpoint.addPathParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
-                                            break;
-                                        case "endpointFormParam":
-                                            endpoint.addFormParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
-                                            break;
-                                        case "endpointRequestHeader":
-                                            endpoint.addHeaderParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
-                                            break;
-                                        case "endpointResponseHeader":
-                                            endpoint.addResponseHeader(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
-                                            break;
-                                        case "endpointStatus":
-                                            endpoint.addResponseStatus(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
-                                            break;
-                                        case "endpointResponseType":
-                                            endpoint.setResponseType(content);
-                                            break;
-                                    }
-                                }
                                 endpoint.setDescription(javadoc.getDescription().toText());
+                                parseEndpoint(endpoint, tags, call);
+                            } else {
+                                parseEndpoint(endpoint, new ArrayList<>(), call);
                             }
                             endpoints.add(endpoint);
                         }
@@ -307,107 +269,194 @@ public class JavalinDoc {
                     //
     
                 }
-            } /*else {
-                System.out.println(node.getClass() + "\t" + node);
-            }*/
-            //System.out.println(node.getClass().getSimpleName() + "\t" + node);  
+            }
         } 
     }
 
+    private void parseEndpoint(Endpoint endpoint, List<JavadocBlockTag> tags, MethodCallExpr call) {
+        endpoint.setType(Endpoint.Type.valueOf(call.getNameAsString().toUpperCase()));
+        getCommentTag(tags, "endpointType");
+        if (call.getArgument(0) instanceof StringLiteralExpr) {
+            endpoint.setEndpoint(((StringLiteralExpr)call.getArgument(0)).asString());
+            getCommentTag(tags, "endpoint");
+        } else {
+            JavadocBlockTag tag = getCommentTag(tags, "endoint");
+            if (tag != null) {
+                endpoint.setEndpoint(tag.getContent().toText().strip());
+            }
+        }
+        if (call.getArgument(1) instanceof LambdaExpr) {
+            parseLambdaExpression((LambdaExpr)call.getArgument(1), endpoint, tags);
+        }
+        for (JavadocBlockTag tag: tags) {
+            String content = tag.getContent().toText().strip();
+            switch (tag.getTagName()) {
+                case "endpoint":
+                    endpoint.setEndpoint(content);
+                    break;
+                case "endpointType":
+                    endpoint.setType(Endpoint.Type.valueOf(content));
+                    break;
+                case "endpointQueryParam":
+                    endpoint.addQueryParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
+                    break;
+                case "endpointPathParam":
+                    endpoint.addPathParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
+                    break;
+                case "endpointFormParam":
+                    endpoint.addFormParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
+                    break;
+                case "endpointRequestHeader":
+                    endpoint.addHeaderParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
+                    break;
+                case "endpointResponseHeader":
+                    endpoint.addResponseHeader(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
+                    break;
+                case "endpointStatus":
+                    endpoint.addResponseStatus(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
+                    break;
+                case "endpointResponseType":
+                    endpoint.setResponseType(content);
+                    break;
+            }
+        }
+    }
+
     private void parseLambdaExpression(LambdaExpr expr, Endpoint endpoint, List<JavadocBlockTag> tags) {
+        String ctx = expr.getParameter(0).getNameAsString();
         Statement e = expr.getBody();
         if (e instanceof BlockStmt) {
             NodeList<Statement> stmts = ((BlockStmt) e).getStatements();
-            for(Statement stmt: stmts) {
-                if (stmt instanceof ExpressionStmt) {
-                    ExpressionStmt stm = (ExpressionStmt) stmt;
-                    if (stm.getExpression() instanceof MethodCallExpr) {
-                        MethodCallExpr call = (MethodCallExpr) stm.getExpression();
-                        Optional<Expression> exp = call.getScope();
-                        if (exp.isPresent() && exp.get() instanceof NameExpr) {
-                            if (getSymbol((NameExpr) exp.get()).equals("? super io.javalin.http.Context")) {
-                                switch(call.getNameAsString()) {
-                                    case "json":
-                                        endpoint.setResponseType("json");
-                                        break;
-                                    case "formParam":
-                                        if (call.getArgument(0) instanceof StringLiteralExpr) {
-                                            JavadocBlockTag tag = getCommentTag(tags,"endpointFormParam",((StringLiteralExpr) call.getArgument(0)).asString());
-                                            if (tag != null) {
-                                                String content = tag.getContent().toText().strip();
-                                                endpoint.addFormParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
-                                            } else {
-                                                endpoint.addFormParam(new Parameter(call.getArgument(0).toString(), ""));
-                                            }
-                                        }
-                                        break;
-                                    case "pathParam":
-                                        if (call.getArgument(0) instanceof StringLiteralExpr) {
-                                            JavadocBlockTag tag = getCommentTag(tags,"endpointPathParam",((StringLiteralExpr) call.getArgument(0)).asString());
-                                            if (tag != null) {
-                                                String content = tag.getContent().toText().strip();
-                                                endpoint.addPathParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
-                                            } else {
-                                                endpoint.addPathParam(new Parameter(call.getArgument(0).toString(), ""));
-                                            }
-                                        }
-                                        break;
-                                    case "header":
-                                        if (call.getArguments().size() == 1) {
-                                            if (call.getArgument(0) instanceof StringLiteralExpr) {
-                                                JavadocBlockTag tag = getCommentTag(tags,"endpointRequestHeader",((StringLiteralExpr) call.getArgument(0)).asString());
-                                                if (tag != null) {
-                                                    String content = tag.getContent().toText().strip();
-                                                    endpoint.addHeaderParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
-                                                } else {
-                                                    endpoint.addHeaderParam(new Parameter(call.getArgument(0).toString(), ""));
-                                                }
-                                            }
-                                        } else {
-                                            if (call.getArgument(0) instanceof StringLiteralExpr) {
-                                                JavadocBlockTag tag = getCommentTag(tags,"endpointResponseHeader",((StringLiteralExpr) call.getArgument(0)).asString());
-                                                if (tag != null) {
-                                                    String content = tag.getContent().toText().strip();
-                                                    endpoint.addResponseHeader(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
-                                                } else {
-                                                    endpoint.addResponseHeader(new Parameter(call.getArgument(0).toString(), ""));
-                                                }
-                                            }
-                                        }
-                                        break;
-                                    case "queryParam":
-                                        if (call.getArgument(0) instanceof StringLiteralExpr) {
-                                            JavadocBlockTag tag = getCommentTag(tags,"endpointQueryParam",((StringLiteralExpr) call.getArgument(0)).asString());
-                                            if (tag != null) {
-                                                String content = tag.getContent().toText().strip();
-                                                endpoint.addQueryParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
-                                            } else {
-                                                endpoint.addQueryParam(new Parameter(call.getArgument(0).toString(), ""));
-                                            }
-                                        }
-                                        break;
-                                    case "html":
-                                        endpoint.setResponseType("html");
-                                        break;
-                                    case "status":
-                                        if (call.getArgument(0) instanceof IntegerLiteralExpr) {
-                                            JavadocBlockTag tag = getCommentTag(tags,"endpointStatus",((IntegerLiteralExpr) call.getArgument(0)).toString());
-                                            if (tag != null) {
-                                                String content = tag.getContent().toText().strip();
-                                                endpoint.addResponseStatus(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
-                                            } else {
-                                                endpoint.addResponseStatus(new Parameter(call.getArgument(0).toString(), ""));
-                                            }
-                                        }
-                                        break;
-                                }
-                            }
-                        }
-                    }
+            parseLambdaStatements(stmts, endpoint, tags, ctx);
+        }
+
+    }
+
+    private void parseLambdaStatements(NodeList<Statement> stmts, Endpoint endpoint, List<JavadocBlockTag> tags, String ctx) {
+        for(Statement stmt: stmts) {
+            //System.out.println(stmt  + "\t" + stmt.getClass().getSimpleName());
+            if (stmt instanceof ExpressionStmt) {
+                ExpressionStmt stm = (ExpressionStmt) stmt;
+                parseLambdaExpressionStmt(endpoint, stm, tags, ctx);
+            } else if (stmt instanceof NodeWithBody) {
+                Statement bod = ((NodeWithBody)stmt).getBody();
+                //System.out.println(bod.getClass().getSimpleName() + "\t" + bod);
+                if (bod instanceof BlockStmt) {
+                    NodeList<Statement> newStmts = ((BlockStmt) bod).getStatements();
+                    parseLambdaStatements(newStmts, endpoint, tags, ctx);
+                }
+            } else if (stmt instanceof IfStmt) {
+                IfStmt stm = (IfStmt) stmt;
+                if (stm.getThenStmt() instanceof BlockStmt) {
+                    NodeList<Statement> newStmts = ((BlockStmt) stm.getThenStmt()).getStatements();
+                    parseLambdaStatements(newStmts, endpoint, tags, ctx);
+                }
+                if (stm.getElseStmt().isPresent() && stm.getElseStmt().get() instanceof BlockStmt) {
+                    NodeList<Statement> newStmts = ((BlockStmt) stm.getElseStmt().get()).getStatements();
+                    parseLambdaStatements(newStmts, endpoint, tags, ctx);
                 }
             }
         }
+    }
 
+    private void parseLambdaExpressionStmt(Endpoint endpoint, ExpressionStmt stm, List<JavadocBlockTag> tags, String ctx ){
+                    //System.out.println(stm + "\t" + stm.getExpression().getClass().getSimpleName());
+                    if (stm.getExpression() instanceof MethodCallExpr) {
+                        MethodCallExpr call = (MethodCallExpr) stm.getExpression();
+                        parseMethodLambdaCall(endpoint, call, tags, ctx);
+                    } else if (stm.getExpression() instanceof VariableDeclarationExpr) {
+                        VariableDeclarationExpr declaration = (VariableDeclarationExpr) stm.getExpression();
+                        try {
+                            Optional<Expression> init = declaration.getVariable(0).getInitializer();
+                            if (init.isPresent() && init.get() instanceof MethodCallExpr) {
+                                MethodCallExpr call = (MethodCallExpr) init.get();
+                                parseMethodLambdaCall(endpoint, call, tags, ctx);
+                            }
+                        } catch (Exception except) {}
+                    }
+    }
+
+    private void parseMethodLambdaCall(Endpoint endpoint, MethodCallExpr call, List<JavadocBlockTag> tags, String ctx) {
+        Optional<Expression> exp = call.getScope();
+        if (exp.isPresent() && exp.get() instanceof NameExpr) {
+            if ((getSymbol((NameExpr) exp.get()).equals("? super io.javalin.http.Context")) || ((NameExpr) exp.get()).getNameAsString().equals(ctx)) {
+                switch(call.getNameAsString()) {
+                    case "json":
+                        endpoint.setResponseType("json");
+                        break;
+                    case "formParam":
+                        if (call.getArgument(0) instanceof StringLiteralExpr) {
+                            JavadocBlockTag tag = getCommentTag(tags,"endpointFormParam",((StringLiteralExpr) call.getArgument(0)).asString());
+                            if (tag != null) {
+                                String content = tag.getContent().toText().strip();
+                                endpoint.addFormParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                            } else {
+                                endpoint.addFormParam(new Parameter(call.getArgument(0).toString(), ""));
+                            }
+                        }
+                        break;
+                    case "pathParam":
+                        if (call.getArgument(0) instanceof StringLiteralExpr) {
+                            JavadocBlockTag tag = getCommentTag(tags,"endpointPathParam",((StringLiteralExpr) call.getArgument(0)).asString());
+                            if (tag != null) {
+                                String content = tag.getContent().toText().strip();
+                                endpoint.addPathParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                            } else {
+                                endpoint.addPathParam(new Parameter(call.getArgument(0).toString(), ""));
+                            }
+                        }
+                        break;
+                    case "header":
+                        if (call.getArguments().size() == 1) {
+                            if (call.getArgument(0) instanceof StringLiteralExpr) {
+                                JavadocBlockTag tag = getCommentTag(tags,"endpointRequestHeader",((StringLiteralExpr) call.getArgument(0)).asString());
+                                if (tag != null) {
+                                    String content = tag.getContent().toText().strip();
+                                    endpoint.addHeaderParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                                } else {
+                                    endpoint.addHeaderParam(new Parameter(call.getArgument(0).toString(), ""));
+                                }
+                            }
+                        } else {
+                            if (call.getArgument(0) instanceof StringLiteralExpr) {
+                                JavadocBlockTag tag = getCommentTag(tags,"endpointResponseHeader",((StringLiteralExpr) call.getArgument(0)).asString());
+                                if (tag != null) {
+                                    String content = tag.getContent().toText().strip();
+                                    endpoint.addResponseHeader(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                                } else {
+                                    endpoint.addResponseHeader(new Parameter(call.getArgument(0).toString(), ""));
+                                }
+                            }
+                        }
+                        break;
+                    case "queryParam":
+                        if (call.getArgument(0) instanceof StringLiteralExpr) {
+                            JavadocBlockTag tag = getCommentTag(tags,"endpointQueryParam",((StringLiteralExpr) call.getArgument(0)).asString());
+                            if (tag != null) {
+                                String content = tag.getContent().toText().strip();
+                                endpoint.addQueryParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                            } else {
+                                endpoint.addQueryParam(new Parameter(call.getArgument(0).toString(), ""));
+                            }
+                        }
+                        break;
+                    case "html":
+                        endpoint.setResponseType("html");
+                        break;
+                    case "status":
+                        if (call.getArgument(0) instanceof IntegerLiteralExpr) {
+                            JavadocBlockTag tag = getCommentTag(tags,"endpointStatus",((IntegerLiteralExpr) call.getArgument(0)).toString());
+                            if (tag != null) {
+                                String content = tag.getContent().toText().strip();
+                                endpoint.addResponseStatus(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                            } else {
+                                endpoint.addResponseStatus(new Parameter(call.getArgument(0).toString(), ""));
+                            }
+                        }
+                        break;
+                }
+            }
+        }
     }
 
     private JavadocBlockTag getCommentTag(List<JavadocBlockTag> tags, String type) {
@@ -488,6 +537,8 @@ public class JavalinDoc {
             return dec.getType().describe();
         } catch (UnsolvedSymbolException exception) {
             return exception.toString();
+        } catch (RuntimeException exception) {
+            return "";
         }
-    }
+     }
 }

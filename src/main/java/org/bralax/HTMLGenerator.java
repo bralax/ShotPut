@@ -80,15 +80,12 @@ public class HTMLGenerator {
         HtmlTree blockList = new HtmlTree(TagName.DIV).setStyle(HtmlStyle.block);
         blockList.add(new HtmlTree(TagName.H3).add("Endpoint Details"));
         for (Endpoint endpoint: endpoints) {
-            System.out.println(endpoint);
             String link = endpoint.getType().toLowerCase() + "-" + endpoint.getEndpoint();
             HtmlTree a = new HtmlTree(TagName.A).put(HtmlAttr.NAME, link).put(HtmlAttr.ID, link);
             blockList.add(a);
             blockList.add(generateEndpointDetails(endpoint));
-            System.out.println(blockList);
         }
         details.add(new HtmlTree(TagName.DIV).setStyle(HtmlStyle.blockList).add(blockList));
-        System.out.println(details);
         tree.add(details);
     }  
 
