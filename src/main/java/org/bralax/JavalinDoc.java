@@ -37,7 +37,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
 import io.javalin.Javalin;
-import sun.tools.tree.IfStatement;
 
 import java.io.File;
 import java.io.IOException;
@@ -268,7 +267,6 @@ public class JavalinDoc {
                     //call.getArguments() -> the parameters passed to the method
                     //call.getScope() -> the caller
                     //getSymbol(((NameExpr) exp.get())).equals('io.javalin.Javalin') -> is a endpoint
-    
                 }
             }
         } 
