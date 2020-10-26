@@ -21,14 +21,14 @@ Also the classpath is the folder containing the source code you would like to do
 ## Documenting Code
 The system follows a similar set of rules to a traditional javadoc comment. The javadoc comment should be located directly above a call to create a javalin endpoint. The one major difference is that this system uses a seperate set of `@tags` from Javadoc. Currently, **None** of the normal javadoc `@tags` are available in JavalinDoc. The available tags for JavalinDoc are:
 * `@endpoint` - The address of this endpoint. See point 2 under Limitations to see when this is required
-* `@endpointType` - The type of endpoint this is. The type should be in all-caps. This parameter is currently unused but in the future will used when specifying an endpoint outside of Limitation 1. 
-* `@endpointQueryParam` - A query parameter that the system requests. Should be in the format `@tag {parameter} {description}`
-* `@endpointPathParam` - A path parameter that the system requests. Should be in the format `@tag {parameter} {description}`
-* `@endpointFormParam` - A form parameter that the system requests. Should be in the format `@tag {parameter} {description}`
-* `@endpointRequestHeader` - A request header that the system requests. Should be in the format `@tag {header name} {description}`
-* `@endpointResponseHeader` - A response header that the system returns. Should be in the format `@tag {header name} {description}`
-* `@endpointStatus` - A status code that the system could return. Should be in the format `@tag {code} {reason for code}`
-* `@endpointResponseType` - The type of data the system returns 
+* `@type` - The type of endpoint this is. The type should be in all-caps. This parameter is currently unused but in the future will used when specifying an endpoint outside of Limitation 1. 
+* `@queryParam` - A query parameter that the system requests. Should be in the format `@tag {parameter} {description}`
+* `@pathParam` - A path parameter that the system requests. Should be in the format `@tag {parameter} {description}`
+* `@formParam` - A form parameter that the system requests. Should be in the format `@tag {parameter} {description}`
+* `@requestHeader` - A request header that the system requests. Should be in the format `@tag {header name} {description}`
+* `@responseHeader` - A response header that the system returns. Should be in the format `@tag {header name} {description}`
+* `@responseStatus` - A status code that the system could return. Should be in the format `@tag {code} {reason for code}`
+* `@responseType` - The type of data the system returns 
   
 Note: All of the above tags are block tags.
 
@@ -37,15 +37,15 @@ Note: All of the above tags are block tags.
     /** This is an example endpoint.
      *  This endpoint does some stuff.
      *  @endpoint /{age}/
-     *  @endpointType GET
-     *  @endpointQueryParam name your name for the system to interpret
-     *  @endpointPathParam age your age for the system to think about
-     *  @endpointFormParam height your hieght to be contemplated
-     *  @endpointRequestHeader token a java web token
-     *  @endpointResponseHeader cookies a updated java web token for the future
-     *  @endpointStatus 200 the system liked you
-     *  @endpointStatus 403 you are unworthy of access
-     *  @endpointResponseType json
+     *  @type GET
+     *  @queryParam name your name for the system to interpret
+     *  @pathParam age your age for the system to think about
+     *  @formParam height your hieght to be contemplated
+     *  @requestHeader token a java web token
+     *  @responseHeader cookies a updated java web token for the future
+     *  @responseStatus 200 the system liked you
+     *  @responseStatus 403 you are unworthy of access
+     *  @responseType json
     */
 ```
 

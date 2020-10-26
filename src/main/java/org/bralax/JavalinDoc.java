@@ -274,12 +274,12 @@ public class JavalinDoc {
 
     private void parseEndpoint(Endpoint endpoint, List<JavadocBlockTag> tags, MethodCallExpr call) {
         endpoint.setType(Endpoint.Type.valueOf(call.getNameAsString().toUpperCase()));
-        getCommentTag(tags, "endpointType");
+        getCommentTag(tags, "type");
         if (call.getArgument(0) instanceof StringLiteralExpr) {
             endpoint.setEndpoint(((StringLiteralExpr)call.getArgument(0)).asString());
             getCommentTag(tags, "endpoint");
         } else {
-            JavadocBlockTag tag = getCommentTag(tags, "endoint");
+            JavadocBlockTag tag = getCommentTag(tags, "endpoint");
             if (tag != null) {
                 endpoint.setEndpoint(tag.getContent().toText().strip());
             }
@@ -293,28 +293,28 @@ public class JavalinDoc {
                 case "endpoint":
                     endpoint.setEndpoint(content);
                     break;
-                case "endpointType":
+                case "type":
                     endpoint.setType(Endpoint.Type.valueOf(content));
                     break;
-                case "endpointQueryParam":
+                case "queryParam":
                     endpoint.addQueryParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
                     break;
-                case "endpointPathParam":
+                case "pathParam":
                     endpoint.addPathParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
                     break;
-                case "endpointFormParam":
+                case "formParam":
                     endpoint.addFormParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
                     break;
-                case "endpointRequestHeader":
+                case "requestHeader":
                     endpoint.addHeaderParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
                     break;
-                case "endpointResponseHeader":
+                case "responseHeader":
                     endpoint.addResponseHeader(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
                     break;
-                case "endpointStatus":
+                case "responseStatus":
                     endpoint.addResponseStatus(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
                     break;
-                case "endpointResponseType":
+                case "responseType":
                     endpoint.setResponseType(content);
                     break;
             }
@@ -383,7 +383,7 @@ public class JavalinDoc {
                         break;
                     case "formParam":
                         if (call.getArgument(0) instanceof StringLiteralExpr) {
-                            JavadocBlockTag tag = getCommentTag(tags,"endpointFormParam",((StringLiteralExpr) call.getArgument(0)).asString());
+                            JavadocBlockTag tag = getCommentTag(tags,"formParam",((StringLiteralExpr) call.getArgument(0)).asString());
                             if (tag != null) {
                                 String content = tag.getContent().toText().strip();
                                 endpoint.addFormParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
@@ -394,7 +394,7 @@ public class JavalinDoc {
                         break;
                     case "pathParam":
                         if (call.getArgument(0) instanceof StringLiteralExpr) {
-                            JavadocBlockTag tag = getCommentTag(tags,"endpointPathParam",((StringLiteralExpr) call.getArgument(0)).asString());
+                            JavadocBlockTag tag = getCommentTag(tags,"pathParam",((StringLiteralExpr) call.getArgument(0)).asString());
                             if (tag != null) {
                                 String content = tag.getContent().toText().strip();
                                 endpoint.addPathParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
@@ -406,7 +406,7 @@ public class JavalinDoc {
                     case "header":
                         if (call.getArguments().size() == 1) {
                             if (call.getArgument(0) instanceof StringLiteralExpr) {
-                                JavadocBlockTag tag = getCommentTag(tags,"endpointRequestHeader",((StringLiteralExpr) call.getArgument(0)).asString());
+                                JavadocBlockTag tag = getCommentTag(tags,"requestHeader",((StringLiteralExpr) call.getArgument(0)).asString());
                                 if (tag != null) {
                                     String content = tag.getContent().toText().strip();
                                     endpoint.addHeaderParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
@@ -416,7 +416,7 @@ public class JavalinDoc {
                             }
                         } else {
                             if (call.getArgument(0) instanceof StringLiteralExpr) {
-                                JavadocBlockTag tag = getCommentTag(tags,"endpointResponseHeader",((StringLiteralExpr) call.getArgument(0)).asString());
+                                JavadocBlockTag tag = getCommentTag(tags,"responseHeader",((StringLiteralExpr) call.getArgument(0)).asString());
                                 if (tag != null) {
                                     String content = tag.getContent().toText().strip();
                                     endpoint.addResponseHeader(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
@@ -428,7 +428,7 @@ public class JavalinDoc {
                         break;
                     case "queryParam":
                         if (call.getArgument(0) instanceof StringLiteralExpr) {
-                            JavadocBlockTag tag = getCommentTag(tags,"endpointQueryParam",((StringLiteralExpr) call.getArgument(0)).asString());
+                            JavadocBlockTag tag = getCommentTag(tags,"queryParam",((StringLiteralExpr) call.getArgument(0)).asString());
                             if (tag != null) {
                                 String content = tag.getContent().toText().strip();
                                 endpoint.addQueryParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
@@ -442,7 +442,7 @@ public class JavalinDoc {
                         break;
                     case "status":
                         if (call.getArgument(0) instanceof IntegerLiteralExpr) {
-                            JavadocBlockTag tag = getCommentTag(tags,"endpointStatus",((IntegerLiteralExpr) call.getArgument(0)).toString());
+                            JavadocBlockTag tag = getCommentTag(tags,"responseStatus",((IntegerLiteralExpr) call.getArgument(0)).toString());
                             if (tag != null) {
                                 String content = tag.getContent().toText().strip();
                                 endpoint.addResponseStatus(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
