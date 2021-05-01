@@ -38,10 +38,10 @@ public class MarkdownWriterUtils {
 
     public String getInputType(String baseType) {
         switch(baseType) {
-            case "number":
-            case "integer":
+            case "Float":
+            case "Int":
                 return "number";
-            case "file":
+            case "File":
                 return "file";
             default:
                 return "text";

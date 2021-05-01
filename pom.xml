@@ -102,7 +102,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>org.bralax.JavalinDoc</mainClass>
+                            <mainClass>org.bralax.CLI</mainClass>
                         </manifest>
                     </archive>
                     </configuration>
@@ -113,7 +113,7 @@
                     <configuration>
                         <archive>
                         <manifest>
-                            <mainClass>org.bralax.JavalinDoc</mainClass>
+                            <mainClass>org.bralax.CLI</mainClass>
                         </manifest>
                         </archive>
                         <descriptorRefs>

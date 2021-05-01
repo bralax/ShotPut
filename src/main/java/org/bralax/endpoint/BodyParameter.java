@@ -21,7 +21,7 @@ public class BodyParameter {
     }
 
     public void addChild(Parameter param, int level) {
-        String[] splitName = param.getName().split("[]");
+        String[] splitName = param.getName().split(".");
         int index = 0;
         for (int i = level; i < splitName.length; i++) {
             String name = splitName[i];

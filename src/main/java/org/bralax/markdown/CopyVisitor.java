@@ -1,4 +1,4 @@
-package org.bralax;
+package org.bralax.markdown;
 
 import org.commonmark.node.AbstractVisitor;
 import org.commonmark.node.*;

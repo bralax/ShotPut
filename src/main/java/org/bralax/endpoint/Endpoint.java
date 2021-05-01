@@ -65,7 +65,7 @@ public class Endpoint {
    
    public void addFormParam(Parameter param) {
       this.formParams.add(param);
-      String[] splitName = param.getName().split("[]");
+      String[] splitName = param.getName().split(".");
       if (splitName.length == 1) {
          if (this.bodyParams.containsKey(splitName[0])) {
             this.bodyParams.get(splitName[0]).setParam(param);
