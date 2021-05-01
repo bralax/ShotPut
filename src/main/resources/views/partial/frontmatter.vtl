@@ -1,0 +1,25 @@
+
+title: $settings.title
+
+language_tabs:
+#foreach($language in $settings.languages)
+    - $language 
+#end
+
+includes:
+    - prepend.md
+    - authentication.md
+    - groups/
+    - errors.md
+    - append.md
+
+logo: $settings.logo
+
+toc_footers:
+#if($showPostmanCollectionButton)
+    - <a href="$postmanCollectionLink">View Postman collection</a>
+#end
+#if($showOpenAPISpecButton)
+    - <a href="$openAPISpecLink">View OpenAPI (Swagger) spec</a>
+#end
+    - <a href='http://github.com/bralax/javalin-doc'>Documentation powered by Javalin Doc</a>

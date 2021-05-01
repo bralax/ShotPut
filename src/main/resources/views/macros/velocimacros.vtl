@@ -1,0 +1,84 @@
+#macro( badge $color $text ) 
+    <small class="badge badge-$color">$text</small>
+#end
+
+#macro( authBadge $authed)
+    #if ($authed)
+        #badge( "darkred" "requires authentication")
+    #end
+#end
+
+#macro( methodBadge $util $method)
+    #badge(${util.methodToColor(${method})} $method)
+#end
+
+#macro( fieldDetail $name $type $required $description $endpointId $component)
+<b><code>$name</code></b>&nbsp;&nbsp;#if($type)<small>$type</small>#end #if(!$required)
+    <i>optional</i>#end &nbsp;
+#if( $isInput )
+#set( $isList = $type.endsWith("[]"))
+#set( $isPassword = $name.contains("/password/"))
+#set( $fullName = $name.replace("[]", ".0"))
+#if ($isList)
+#set($typelength = $type.length())
+#set($typelength = $typelength - 2)
+#set( $baseType = $type.substring( 0, $typelength))
+#else
+#set( $baseType = $type)
+#end
+#set( $fullName = $util.fullNameForArr($fullName, $baseType))
+#set( $baseType = $util.fullTypeForArr( $baseType))
+#set( $inputType = $util.getInputType($baseType))
+#if($type == "boolean")
+#if ($component == "body")
+#set( $tru = "true")
+#set( $fals = "false")
+#else 
+#set( $tru =  1)
+#set( $fals = 0)
+#end
+<label data-endpoint="$endpointId" hidden><input type="radio" name="$fullName" value="$tru" data-endpoint="$endpointId" data-component="$component" #if($required)required #end><code>true</code></label>
+<label data-endpoint="$endpointId" hidden><input type="radio" name="$fullName" value="$fals" data-endpoint="$endpointId" data-component="$component" #if($required)required #end><code>false</code></label>
+#elseif($isList)
+#if ( $isPassword )
+#set($inputType = "password")
+#end
+<input type="$inputType" name="${fullName}.0" data-endpoint="$endpointId" data-component="$component" #if($required)required #end hidden>
+<input type="$inputType" name="${fullName}.1" data-endpoint="$endpointId" data-component="$component" hidden>
+#else
+#if ( $isPassword )
+#set($inputType = "password")
+#end
+<input type="$inputType" name="$fullName" data-endpoint="$endpointId" data-component="$component" #if($required)required #end hidden>
+#end
+#end
+<br>
+$description
+#end
+
+#macro( bodyParams $parameter $endpointId )
+#if (!$parameter.children.isEmpty())
+<p>
+<details>
+<summary>
+#fieldDetail ( $parameter.param.name $parameter.param.type $parameter.param.required $parameter.param.description $endpointId true "body")
+</summary>
+<br>
+#foreach($subfield in $parameter.children.values())
+#if(!$subfield.children.isEmpty())
+#bodyParams( $subfield $endpointId)
+#else
+<p>
+#fieldDetail( $subfield.param.name $subfield.param.type $subfield.param.required $subfield.param.description $endpointId false "body")
+
+</p>
+#end
+#end
+</details>
+</p>
+#else
+<p>
+#fieldDetail ( $parameter.param.name $parameter.param.type $parameter.param.required $parameter.param.description $endpointId false "body")
+</p>
+#end
+#end

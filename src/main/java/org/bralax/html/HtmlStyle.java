@@ -690,7 +690,11 @@ public enum HtmlStyle {
     treePage,
     //</editor-fold>
 
-    endpointBlock;
+    endpointBlock,
+
+    endpointType,
+
+    endpointName;
 
     private final String cssName;
 

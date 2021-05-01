@@ -1,7 +1,9 @@
-package org.bralax;
+package org.bralax.endpoint;
 
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Endpoint {
    private Type type;
@@ -9,11 +11,15 @@ public class Endpoint {
    private List<Parameter> pathParams;
    private List<Parameter> queryParams;
    private List<Parameter> formParams;
+   private Map<String, BodyParameter> bodyParams;
    private List<Parameter> headerParams;
    private List<Parameter> responseHeaders;
    private List<Parameter> responseStatuses;
+   private List<Parameter> exampleResponse;
    private String responseType;
    private String responseDescription;
+   private boolean authenticated;
+   private String group;
 
    private String description;
    
@@ -25,9 +31,13 @@ public class Endpoint {
       this.pathParams = new ArrayList<>();
       this.queryParams = new ArrayList<>();
       this.formParams = new ArrayList<>();
+      this.bodyParams = new HashMap<>();
       this.headerParams = new ArrayList<>();
       this.responseStatuses = new ArrayList<>();
       this.responseHeaders = new ArrayList<>();
+      this.exampleResponse = new ArrayList<>();
+      this.group = "Endpoint";
+      this.authenticated = false;
    }
    
    public Endpoint(Type type, String endpoint) {
@@ -41,6 +51,8 @@ public class Endpoint {
       this.headerParams = new ArrayList<>();
       this.responseStatuses = new ArrayList<>();
       this.responseHeaders = new ArrayList<>();
+      this.authenticated = false;
+      this.group = "Endpoint";
    }
    
    public void addPathParam(Parameter param) {
@@ -53,6 +65,22 @@ public class Endpoint {
    
    public void addFormParam(Parameter param) {
       this.formParams.add(param);
+      String[] splitName = param.getName().split("[]");
+      if (splitName.length == 1) {
+         if (this.bodyParams.containsKey(splitName[0])) {
+            this.bodyParams.get(splitName[0]).setParam(param);
+         } else {
+            this.bodyParams.put(splitName[0], new BodyParameter(param));
+         }
+      } else if (splitName.length > 1) {
+         if (this.bodyParams.containsKey(splitName[0])) {
+            this.bodyParams.get(splitName[0]).addChild(param, 1);
+         } else {
+            BodyParameter body = new BodyParameter(new Parameter(splitName[0], null));
+            body.addChild(param, 1);
+            this.bodyParams.put(splitName[0], body);
+         }
+      }
    }
 
    public void addHeaderParam(Parameter param) {
@@ -65,6 +93,10 @@ public class Endpoint {
 
    public void addResponseHeader(Parameter param) {
       this.responseHeaders.add(param);
+   }
+
+   public void addExampleResponse(Parameter param) {
+      this.exampleResponse.add(param);
    }
 
 
@@ -117,6 +149,34 @@ public class Endpoint {
       return this.responseHeaders.get(i);
    }
 
+   public Parameter[] pathParams() {
+      return this.pathParams.toArray(new Parameter[this.pathParamLength()]);
+   }
+   
+   public Parameter[] queryParams() {
+      return this.queryParams.toArray(new Parameter[this.queryParamLength()]);
+   }
+   
+   public Parameter[] formParams() {
+      return this.formParams.toArray(new Parameter[this.formParamLength()]);
+   }
+
+   public Parameter[] headerParams() {
+      return this.headerParams.toArray(new Parameter[this.formParamLength()]);
+   }
+
+   public Parameter[] responseStatus() {
+      return this.responseStatuses.toArray(new Parameter[this.responseStatuses.size()]);
+   }
+
+   public Parameter[] responseHeaders() {
+      return this.responseHeaders.toArray(new Parameter[this.responseHeaders.size()]);
+   }
+
+   public  Map<String, BodyParameter> bodyParams() {
+      return this.bodyParams;
+   }
+
    
    public String getType() {
       if (this.type != null) {
@@ -166,6 +226,26 @@ public class Endpoint {
       return this.responseDescription;
    }
 
+   public boolean getAuthenticated() {
+      return this.authenticated;
+   }
+
+   public void setAuthenticated(boolean auth) {
+      this.authenticated = auth;
+   }
+
+   public int authInt() {
+      return this.authenticated ? 1 : 0;
+   }
+
+   public String getGroup() {
+      return this.group;
+   }
+
+   public void setGroup(String group) {
+      this.group = group;
+   }
+
    public String toString() {
       return "{endpoint : {type:"+this.type +  "\n" +
       "Endpoint: " + this.endpoint  + "\n" +
@@ -174,6 +254,7 @@ public class Endpoint {
       "Path Parameters: " + this.pathParams + "\n" + 
       "Query Parameters: " + this.queryParams + "\n" +
       "Form Parameters" + this.formParams + "\n" + 
+      "Body Parameters" + this.bodyParams+ "\n" + 
       "Request Headers" + this.headerParams + "\n" + 
       "Response Headers" + this.responseHeaders + "\n" + 
       "Response Status Codes: " + this.responseStatuses + "}";
@@ -192,6 +273,8 @@ public class Endpoint {
       GET,
       POST,
       PATCH,
-      DELETE
+      DELETE,
+      WS,
+      SSE
    }
 }

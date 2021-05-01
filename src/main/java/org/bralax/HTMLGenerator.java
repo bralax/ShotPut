@@ -11,6 +11,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
+import org.bralax.endpoint.Endpoint;
+import org.bralax.endpoint.Parameter;
 import org.bralax.html.*;
 
 
@@ -66,8 +68,12 @@ public class HTMLGenerator {
         boolean even = false;
         for (Endpoint endpoint : endpoints) {
             HtmlTree row = new HtmlTree(TagName.TR).addStyle(even ? HtmlStyle.evenRowColor : HtmlStyle.oddRowColor);
-            row.add(HtmlTree.TD(HtmlStyle.colFirst, new HtmlTree(TagName.A).put(HtmlAttr.HREF, "#" + endpoint.getType().toLowerCase() + "-" + endpoint.getEndpoint()).add(new StringContent(endpoint.getType()))));
-            row.add(HtmlTree.TD(HtmlStyle.colSecond, new HtmlTree(TagName.A).put(HtmlAttr.HREF, "#" + endpoint.getType().toLowerCase() + "-" + endpoint.getEndpoint()).add(new StringContent(endpoint.getEndpoint()))));
+            HtmlTree box = new HtmlTree(TagName.TD).addStyle(HtmlStyle.colFirst);
+            HtmlTree div = HtmlTree.DIV(HtmlStyle.memberSummary);
+            div.add(HtmlTree.DIV(new HtmlTree(TagName.A).put(HtmlAttr.HREF, "#" + endpoint.getType().toLowerCase() + "-" + endpoint.getEndpoint()).add(new StringContent(endpoint.getType()))).addStyle(HtmlStyle.endpointType));
+            div.add(HtmlTree.DIV(new HtmlTree(TagName.A).put(HtmlAttr.HREF, "#" + endpoint.getType().toLowerCase() + "-" + endpoint.getEndpoint()).add(new StringContent(endpoint.getEndpoint()))).addStyle(HtmlStyle.endpointName));
+            box.add(div);
+            row.add(box);
             even = !even;
             body.add(row);
         }

@@ -35,15 +35,18 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-
-import io.javalin.Javalin;
+import org.bralax.endpoint.Endpoint;
+import org.bralax.endpoint.Parameter;
+import org.bralax.markdown.Scribe;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -73,7 +76,7 @@ public class JavalinDoc {
     private void start() throws IOException {
         CombinedTypeSolver solver = new CombinedTypeSolver();
         solver.add(new ReflectionTypeSolver());
-        solver.add(new JarTypeSolver("src/main/resources/javalin-3.9.1.jar"));
+        solver.add(new JarTypeSolver(getClass().getClassLoader().getResource("javalin-3.9.1.jar").openStream()));
         JavaSymbolSolver symbolSolver = new JavaSymbolSolver(solver);
         JavaParser.getStaticConfiguration().setSymbolResolver(symbolSolver);
         this.parse(this.file);
@@ -231,7 +234,23 @@ public class JavalinDoc {
     }
 
     private void generateHTML() throws IOException{
-        HTMLGenerator.generateHTML(css, out, endpoints);
+        new Scribe(out.getAbsolutePath()).writeDocs(this.groupEndpoints(endpoints));
+        //HTMLGenerator.generateHTML(css, out, endpoints);
+    }
+
+    private Map<String, List<Endpoint>> groupEndpoints(List<Endpoint> endpoints) {
+        Map<String, List<Endpoint>> grouped = new HashMap<>();
+        for (Endpoint endpoint: endpoints) {
+            String group = endpoint.getGroup();
+            if (grouped.containsKey(group)) {
+                grouped.get(group).add(endpoint);
+            } else {
+                List<Endpoint> groupList = new ArrayList<>();
+                groupList.add(endpoint);
+                grouped.put(group, groupList);
+            }
+        }
+        return grouped;
     }
 
     private class VisitAll extends TreeVisitor {
@@ -287,8 +306,23 @@ public class JavalinDoc {
         if (call.getArgument(1) instanceof LambdaExpr) {
             parseLambdaExpression((LambdaExpr)call.getArgument(1), endpoint, tags);
         }
+        parseJavadocTags(endpoint, tags);
+    }
+
+    private void parseJavadocTags(Endpoint endpoint, List<JavadocBlockTag> tags) {
+        endpoint.setAuthenticated(false);
         for (JavadocBlockTag tag: tags) {
             String content = tag.getContent().toText().strip();
+            String tagName = tag.getTagName();
+            if (tagName.equals("endpoint")) {
+                endpoint.setEndpoint(content);
+            } else if (tagName.equals("type")) {
+                endpoint.setType(Endpoint.Type.valueOf(content));
+            } else if (tagName.equals("authenticated")) {
+                endpoint.setAuthenticated(true);
+            } else if (tagName.equals("group")) {
+                endpoint.setGroup(content);
+            } else if (tagName.equals(""))
             switch (tag.getTagName()) {
                 case "endpoint":
                     endpoint.setEndpoint(content);
@@ -296,29 +330,94 @@ public class JavalinDoc {
                 case "type":
                     endpoint.setType(Endpoint.Type.valueOf(content));
                     break;
-                case "queryParam":
-                    endpoint.addQueryParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
-                    break;
-                case "pathParam":
-                    endpoint.addPathParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
-                    break;
-                case "formParam":
-                    endpoint.addFormParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
-                    break;
-                case "requestHeader":
-                    endpoint.addHeaderParam(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
-                    break;
-                case "responseHeader":
-                    endpoint.addResponseHeader(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
-                    break;
-                case "responseStatus":
-                    endpoint.addResponseStatus(new Parameter(content.substring(0, content.indexOf(" ")), content.substring(content.indexOf(" "))));
-                    break;
+                case "authenticated":
+                    endpoint.setAuthenticated(true);
+                case "group":
+                    endpoint.setGroup(content);
                 case "responseType":
                     endpoint.setResponseType(content);
                     break;
+                default: 
+                    parseParameterJavadoc(endpoint, tag);
             }
         }
+    }
+
+    private void parseParameterJavadoc(Endpoint endpoint, JavadocBlockTag tag) {
+        String unparsedContent = tag.getContent().toText().strip();
+        Scanner parser = new Scanner(unparsedContent);
+        String paramName, paramType, content;
+        boolean required = false;
+        if (parser.hasNext()) {
+            paramName = parser.next();
+            if (parser.hasNext()) {
+                String next = parser.next();
+                if (isValidParameterType(next)) {
+                    paramType = next;
+                    if (parser.hasNext()) {
+                        next = parser.next();
+                        if (next.equals("required")) {
+                            required = true;
+                            content = getContent(parser);
+                        } else {
+                            content = next + " " +  getContent(parser);
+                        }
+                    } else {
+                        content = "";
+                    }
+                } else if (next.equals("required")) {
+                    paramType = "String";
+                    required = true;
+                    content = getContent(parser);
+                } else {
+                    paramType = "String";
+                    content = next + " " + getContent(parser);
+                }
+            } else {
+                paramType = "String";
+                content = "";
+            }
+        } else {
+            parser.close();
+            return;
+        }
+        parser.close();
+        Parameter newParam = new Parameter(paramName, content);
+        newParam.setRequired(required);
+        newParam.setType(paramType);
+        switch (tag.getTagName()) {
+            case "queryParam":
+                    endpoint.addQueryParam(newParam);
+                    break;
+                case "pathParam":
+                    endpoint.addPathParam(newParam);
+                    break;
+                case "bodyParam":
+                    endpoint.addFormParam(newParam);
+                    break;
+                case "requestHeader":
+                    endpoint.addHeaderParam(newParam);
+                    break;
+                case "responseHeader":
+                    endpoint.addResponseHeader(newParam);
+                    break;
+                case "responseStatus":
+                    endpoint.addResponseStatus(newParam);
+                    break;
+        }
+    }
+
+    private boolean isValidParameterType(String type) {
+        String[] types = {"Boolean", "File", "Float", "Int", "Object", "String"};
+        return Arrays.binarySearch(types, type) >= -1;
+    }
+
+    private String getContent(Scanner scrn) {
+        StringBuilder builder = new StringBuilder();
+        while(scrn.hasNextLine()) {
+            builder.append(scrn.nextLine()).append("\n");
+        }
+        return builder.toString();
     }
 
     private void parseLambdaExpression(LambdaExpr expr, Endpoint endpoint, List<JavadocBlockTag> tags) {
@@ -396,8 +495,7 @@ public class JavalinDoc {
                         if (call.getArgument(0) instanceof StringLiteralExpr) {
                             JavadocBlockTag tag = getCommentTag(tags,"pathParam",((StringLiteralExpr) call.getArgument(0)).asString());
                             if (tag != null) {
-                                String content = tag.getContent().toText().strip();
-                                endpoint.addPathParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                                parseParameterJavadoc(endpoint, tag);
                             } else {
                                 endpoint.addPathParam(new Parameter(call.getArgument(0).toString(), ""));
                             }
@@ -408,8 +506,7 @@ public class JavalinDoc {
                             if (call.getArgument(0) instanceof StringLiteralExpr) {
                                 JavadocBlockTag tag = getCommentTag(tags,"requestHeader",((StringLiteralExpr) call.getArgument(0)).asString());
                                 if (tag != null) {
-                                    String content = tag.getContent().toText().strip();
-                                    endpoint.addHeaderParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                                    parseParameterJavadoc(endpoint, tag);
                                 } else {
                                     endpoint.addHeaderParam(new Parameter(call.getArgument(0).toString(), ""));
                                 }
@@ -418,8 +515,7 @@ public class JavalinDoc {
                             if (call.getArgument(0) instanceof StringLiteralExpr) {
                                 JavadocBlockTag tag = getCommentTag(tags,"responseHeader",((StringLiteralExpr) call.getArgument(0)).asString());
                                 if (tag != null) {
-                                    String content = tag.getContent().toText().strip();
-                                    endpoint.addResponseHeader(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                                    parseParameterJavadoc(endpoint, tag);
                                 } else {
                                     endpoint.addResponseHeader(new Parameter(call.getArgument(0).toString(), ""));
                                 }
@@ -430,8 +526,7 @@ public class JavalinDoc {
                         if (call.getArgument(0) instanceof StringLiteralExpr) {
                             JavadocBlockTag tag = getCommentTag(tags,"queryParam",((StringLiteralExpr) call.getArgument(0)).asString());
                             if (tag != null) {
-                                String content = tag.getContent().toText().strip();
-                                endpoint.addQueryParam(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                                parseParameterJavadoc(endpoint, tag);
                             } else {
                                 endpoint.addQueryParam(new Parameter(call.getArgument(0).toString(), ""));
                             }
@@ -444,8 +539,7 @@ public class JavalinDoc {
                         if (call.getArgument(0) instanceof IntegerLiteralExpr) {
                             JavadocBlockTag tag = getCommentTag(tags,"responseStatus",((IntegerLiteralExpr) call.getArgument(0)).toString());
                             if (tag != null) {
-                                String content = tag.getContent().toText().strip();
-                                endpoint.addResponseStatus(new Parameter(call.getArgument(0).toString(), content.substring(content.indexOf(" "))));
+                                parseParameterJavadoc(endpoint, tag);
                             } else {
                                 endpoint.addResponseStatus(new Parameter(call.getArgument(0).toString(), ""));
                             }
@@ -519,7 +613,7 @@ public class JavalinDoc {
                 doc.addBlockTag(tag, content.toString());
             }
         }
-        scanner.close();;
+        scanner.close();
         return doc;
     }
 
