@@ -1,0 +1,12 @@
+---
+languages:
+   - java
+
+title: Example Documentation
+
+intro: This is an introduction to the documentation.
+
+baseURL: http://localhost:3000
+
+interactive: true
+---

@@ -11,38 +11,85 @@ usage: javalin-doc
  -h,--html               Flag to generate html file. If this flag and -h
                          are not set both will be generated
  -o,--outdir <arg>       The place to put the generated files (Required)
- -s,--css <arg>          The css file to be used on the html
+ -c,--config <arg>       The config file to use. Otherwise the default will be used.
  -x,--excel              Flag to generate excel file. If this flag and -h
                          are not set both will be generated
 ```
 Unlike Javadoc, we will not create a docs folder for you. You have to specify an existing folder where you would like the documetation stored.
 Also the classpath is the folder containing the source code you would like to document. You can only supply one folder at time.
 
+### Running the Documentation engine Programmatically
+The core class of the Documentation Engine is  `org.bralax.JavalinDoc`. To generate documentation, you need to create an instance of that class and then call it's start method.
+The JavalinDoc constructor takes in the following parameters:
+* Config config -> An `org.bralax.Config` object with the settings for generating documentation
+* File src -> The folder that contains java files or the java file to parse
+* boolean excel -> Whether to produce csv documentation
+* boolean html -> Whether to produce html documentation
+* File out -> The folder to place the documentation in
+
+Running the system programatically has one extra feature. The JavalinDoc object has one extra method, `registerGenerator`. It can be called to register a sample code generator for a specific language. A sample code generator should extend
+`org.bralax.code.SampleCodeGenerator` and implement these method:
+* `public String getType()` -> Should return the language this generator supports
+* `public String generate(String baseUrl, Endpoint endpoint)` -> should create a markdown code block that will create a request for this endpoint.
+
+
+### The Config File
+The system supports using a config file for storing important configs for when generating html. See the provided sample: `exampleConfig.yml`. 
+
 ## Documenting Code
-The system follows a similar set of rules to a traditional javadoc comment. The javadoc comment should be located directly above a call to create a javalin endpoint. The one major difference is that this system uses a seperate set of `@tags` from Javadoc. Currently, **None** of the normal javadoc `@tags` are available in JavalinDoc. The available tags for JavalinDoc are:
+The system follows a similar set of rules to a traditional javadoc comment. The javadoc comment should be located directly above a call to create a javalin endpoint. The first line of the javadoc is the title of the endpoint. All text after the first line until the tags is the description. The The one major difference is that this system uses a seperate set of `@tags` from Javadocs. Currently, **None** of the normal javadoc `@tags` are available in JavalinDoc. The available tags for JavalinDoc are:
 * `@endpoint` - The address of this endpoint. See point 2 under Limitations to see when this is required
 * `@type` - The type of endpoint this is. The type should be in all-caps. This parameter is currently unused but in the future will used when specifying an endpoint outside of Limitation 1. 
-* `@queryParam` - A query parameter that the system requests. Should be in the format `@tag {parameter} {description}`
-* `@pathParam` - A path parameter that the system requests. Should be in the format `@tag {parameter} {description}`
-* `@formParam` - A form parameter that the system requests. Should be in the format `@tag {parameter} {description}`
-* `@requestHeader` - A request header that the system requests. Should be in the format `@tag {header name} {description}`
-* `@responseHeader` - A response header that the system returns. Should be in the format `@tag {header name} {description}`
+* `@authenticated` - A tag indicating that you need to be logged in to access this endpoint. Has no parameters.
+* `@queryParam` - A query parameter that the system requests. Should be in the format `@queryParam {parameter} {type} [Required] {description}`
+* `@pathParam` - A path parameter that the system requests. Currently all path parameters are required. Should be in the format `@pathParam {parameter} {type} {description}`
+* `@formParam` - A form parameter that the system requests. Form parameters have the ability to be "leveled". See section below on Objects and Arrays for how this works. Should be in the format `@formParam {parameter} {type} [Required] {description}`
+* `@requestHeader` - A request header that the system requests. Should be in the format `@tag {parameter} {type} [Required] {description}`
+* `@responseHeader` - A response header that the system returns. Should be in the format `@tag {parameter} {type} [Required] {description}`
+* `@exampleResponse` - A example response for the endpoint. Should be of the form: `@tag {description} : {example response}`
 * `@responseStatus` - A status code that the system could return. Should be in the format `@tag {code} {reason for code}`
-* `@responseType` - The type of data the system returns 
-  
+* `@responseType` - The format of data the system returns (json, text, html).
+
+The parameter type can be one of following:
+* `String`
+* `Boolean`
+* `File`
+* `Float`
+* `Int`
+* `Object`
+* `Array`
 Note: All of the above tags are block tags.
 
+### Objects and Arrays
+Sometimes you want to describe complex json objects/arrays in your formParams. For example, if you want the user to pass to pass an instance of this class to your api:
+```JAVA 
+public class Rectangle {
+    int width;
+    int height;
+}
+```
+To do this you need to describe the base form param that needs a rectangle as well as the fields of the rectangle. To do this we allow for `.` notation. So for this example we can write the following:
+```JAVA
+    /** 
+     * ...
+     * @formParam rectangle Object Required A rectangle to do something with
+     * @formParam rectangle.width Int Required The width of the rectangle
+     * @formParam rectangle.height Int Required The height of the rectangle
+     * ...
+     * /
+```
+
 ### Example
-```java
-    /** This is an example endpoint.
+```JAVA
+    /** Example Endpoint
      *  This endpoint does some stuff.
-     *  @endpoint /{age}/
+     *  @endpoint /:age
      *  @type GET
-     *  @queryParam name your name for the system to interpret
-     *  @pathParam age your age for the system to think about
-     *  @formParam height your hieght to be contemplated
-     *  @requestHeader token a java web token
-     *  @responseHeader cookies a updated java web token for the future
+     *  @queryParam name String your name for the system to interpret
+     *  @pathParam age Int Required your age for the system to think about
+     *  @formParam height Int Required your height to be contemplated
+     *  @requestHeader token String Required a java web token
+     *  @responseHeader cookies String a updated java web token for the future
      *  @responseStatus 200 the system liked you
      *  @responseStatus 403 you are unworthy of access
      *  @responseType json
@@ -59,7 +106,7 @@ To give an example:
 
         public static void main(String[] args) {
             ...
-            /**
+            /** 1
              * ...
             */
             get("some endpoint");
@@ -67,19 +114,18 @@ To give an example:
         }
 
         public static void get(String endpoint) {
-            ...
+            ...2
             javalin.get(endpoint, ctx ->{...});
         }
     }
 
     ```
-    This will notice the call to `javalin.get()` within the get method but it will ignore the call to the wrapper function even 
-    if the helper function call in main has a properly structed comment. This is a current limitation of the system and should become more flexible overtime.
+    This will notice the call to `javalin.get()` within the get method but it will ignore the call to the wrapper function even if the helper function call in main has a properly structed comment. This means that putting the doc comment at location 1 will not be interpreted but if you put the comment at location 2 the comment will be interpretted. This can cause problems if you wrap access to javalin in helper methods.
 
 
-2. The system can interpret additional information in specific circumstances.
+1. The system can interpret additional information in specific circumstances.
 The system is designed to do some of the work for you but only if you structure your code in a certain way. These "rules"
-are not best practices but rather there due to the limitations of the system. It's best practice not to write your code based on these rules but rather take then into account when looking at what gets automatically recognized by the system. If you do not follow these rules it just requires more information to be documented by hand.
+are not best practices but rather there due to the limitations of the system. It's best practice not to write your code based on these rules but rather take then into account when looking at what gets automatically recognized by the system. The system uses an Abstract Syntax Tree (AST) so it can only determine things that can be found out from the source code prior to running. If you do not follow these rules it just requires more information to be documented by hand.
     1. If the endpoint name is a string constant, the system will interpret it for you and you will not have to use an `@endpoint` tag. 
         For example:
         ```java
@@ -92,9 +138,21 @@ are not best practices but rather there due to the limitations of the system. It
         ```
         The endpoint will have to be manually specified as internally the system can not determine the runtime value of this variable.
     
-    2. If the endpoint handler is a lambda function `ctx -> {...}` the system will run through the function and try to pull out important pieces of information. It will look for every call to `.queryParam`, `.formParam`,`.pathParam`,`.status` and more to build out a skeleton of the information that needs to be provided in the javadoc comment. Currently this process of interpretting the content of an endpoint can only be done on a lambda expression. This is due to a current system limitation that it can not currently locate a function other than the one it is currently and will hopefully be resolved over time. Also similar to 1, a call to these methods will be ignored if the parameter to the call is a variable not a constant.
-    3. The built-in css file is currently extremely limited. It basically has nothing in it. Currently, the system basically generates a skeletal html file. If you would like better formatting, then you will need to supply a css file as a parameter to the system. Almost every tag in the generated html is marked with a classname that you can use in building a css file.  Overtime, the plan is to build a default css file.
+    2. If the endpoint handler is a lambda function `ctx -> {...}` the system will run through the function and try to pull out important pieces of information. It will look for every call to `.queryParam`, `.formParam`,`.pathParam`,`.status` and more to build out a skeleton of the information that needs to be provided in the javadoc comment. Currently this process of interpretting the content of an endpoint can only be done on a lambda expression. This is due to a current system limitation in which it can not currently locate a function outside the scope of the current function. Also similar to 1, a call to these methods will be ignored if the "field" parameter in the call is a variable not a constant.
+
+
+## Building
+
+The system is based around maven. To build a jar run: 
+`mvn clean compile assembly:single`
+The jar will be located at:
+`target/javalindoc-{version}-jar-with-dependencies.jar`
+
+## Why?
+Javalin has a core maintained plugin for generating OpenApi schemas which could easily converted into documentation.
+That plugin has a few issues that made it hard for me to use in my project. In particular, the documenting mechanism is strange. It use a complex annotation system which could be hard to read for those who have not learned it. I am working on a shared code base where i am the main proponent for documenting. This meant that having a more friendly format (like javadoc) comments were able to lower the barier to entry for the team.
+
 
 ## Credits
 * This library makes use of the [Java Parser](http://javaparser.org) AST Generator
-* The HTML is generated with a modified version of the HTML generator used internally by java for javadoc commenting
+* The system internally makes use of Java port of [Scribe](https://github.com/knuckleswtf/scribe) and [Pastel](https://github.com/knuckleswtf/pastel) a fantastic set of documentation tools for PHP and Javascript that is itself related to [Slate](https://github.com/slatedocs/slate).  

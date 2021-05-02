@@ -1,0 +1,88 @@
+${util.dollar()}${util.dollar()} ${route.getEndpoint()}
+#authBadge( $route.authenticated )
+
+
+$route.description 
+
+> Example request:
+
+#foreach($language in $settings.languages)
+$util.generateRequestForEndpoint($language, $route)
+#end
+
+#if( $route.method == "GET")
+#foreach($response in $route.exampleResponse)
+> Example response $response.name:
+
+```json
+#if($response.description && $response.description.startsWith("<<binary>>")) 
+<Binary data> - $response.description.replace("<<binary>>", "")
+#elseif($response.name == "204")
+<Empty response>
+#else 
+$response.description
+#end
+```
+#end
+#end
+<div id="execution-results-$endpointId" hidden>
+    <blockquote>Received response<span id="execution-response-status-$endpointId"></span>:</blockquote>
+    <pre class="json"><code id="execution-response-content-$endpointId"></code></pre>
+</div>
+<div id="execution-error-$endpointId" hidden>
+    <blockquote>Request failed with error:</blockquote>
+    <pre><code id="execution-error-message-$endpointId"></code></pre>
+</div>
+<form id="form-$endpointId" data-method="$route.type" data-path="$route.endpoint" data-authed="$route.authInt()" data-headers='$route.responseHeaders' onsubmit="event.preventDefault(); executeTryOut('$endpointId', this);">
+<h3>
+    Request&nbsp;&nbsp;&nbsp;
+    #if($settings.interactive)
+    <button type="button" style="background-color: #8fbcd4; padding: 5px 10px; border-radius: 5px; border-width: thin;" id="btn-tryout-$endpointId" onclick="tryItOut('{{ $endpointId }}');">Try it out!</button>
+    <button type="button" style="background-color: #c97a7e; padding: 5px 10px; border-radius: 5px; border-width: thin;" id="btn-canceltryout-$endpointId" onclick="cancelTryOut('$endpointId');" hidden>Cancel</button>&nbsp;&nbsp;
+    <button type="submit" style="background-color: #6ac174; padding: 5px 10px; border-radius: 5px; border-width: thin;" id="btn-executetryout-$endpointId" hidden>Send Request 💥</button>
+    #end
+</h3>
+<p>
+#methodBadge( $util $route.type) <b><code>$route.endpoint</code></b>
+</p>
+
+#if( false && $route['metadata']['authenticated'] && $auth['location'] == 'header')
+<p>
+<label id="auth-$endpointId" hidden>{{ $auth['name'] }} header: <b><code>{{ $auth['prefix'] }}</code></b><input type="text" name="{{ $auth['name'] }}" data-prefix="{{ $auth['prefix'] }}" data-endpoint="{{ $endpointId }}" data-component="header"></label>
+</p>
+#end
+#if($route.pathParamLength() > 0)
+<h4 class="fancy-heading-panel"><b>URL Parameters</b></h4>
+#foreach( $parameter in ${route.pathParams()} )
+<p>
+#fieldDetail( $parameter.name $parameter.type $parameter.required $parameter.description $endpointId 'url' true)
+
+</p>
+#end
+#end
+#if($route.queryParamLength() > 0)
+<h4 class="fancy-heading-panel"><b>Query Parameters</b></h4>
+#foreach($parameter in ${route.queryParams()} )
+<p>
+#fieldDetail( $parameter.name $parameter.type $parameter.required $parameter.description $endpointId 'query' true)
+
+</p>
+#end
+#end
+#if($route.formParamLength() > 0)
+<h4 class="fancy-heading-panel"><b>Body Parameters</b></h4>
+#foreach( $param in ${route.bodyParams().values()} )
+    #bodyParams( $param, $endpointId)
+#end
+#end
+</form>
+
+#if (false && $route.responseStatusLength() > 0 )
+### Response
+<h4 class="fancy-heading-panel"><b>Response Types</b></h4>
+#foreach($response in ${route.responseStatuses()})
+<p>
+#fieldDetail( $response.name $response.type $response.required $response.description $endpointId "response" false)
+</p>
+#end
+#end

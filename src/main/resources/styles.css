@@ -1,4 +1,55 @@
-.body {
+body {
     width: 100%;
     height: 100%;
+    flex-direction: column;
+    align-items: center;
+    display: flex;
+}
+
+.summary {
+    width: 95%;
+    flex: 1;
+}
+
+.summary-table {
+    background-color: #eeeeee;
+    border-radius: 25px;
+    padding: 10px;
+    width: 100%;
+}
+
+.col-first {
+    padding-left: 10px;
+    padding-bottom: 10px;
+}
+
+.member-summary > div > a {
+    color: black;
+}
+.member-summary > div > a:not(:hover) {
+    text-decoration: none;
+}
+
+.member-summary > div > a:hover {
+    text-decoration: underline;
+}
+
+.member-summary {
+    display: flex;
+    flex-direction: row;
+    background-color: white;
+    border-radius: 10px;
+}
+.endpoint-type {
+    min-width: 100px;
+    text-align: center;
+    background-color: #dddddd;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.endpoint-name {
+    min-width: 100px;
+    padding: 5px;
+    padding-left: 20px;
 }
