@@ -1,4 +1,4 @@
-## $route.endpoint
+${util.dollar()}${util.dollar()} ${route.getEndpoint()}
 #authBadge( $route.authenticated )
 
 
@@ -7,7 +7,7 @@ $route.description
 > Example request:
 
 #foreach($language in $settings.languages)
-    $util.generateRequestForEndpoint($language, $route)
+$util.generateRequestForEndpoint($language, $route)
 #end
 
 #if( $route.method == "GET")

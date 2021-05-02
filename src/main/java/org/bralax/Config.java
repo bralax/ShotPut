@@ -26,4 +26,32 @@ public class Config {
         config.logo = null;
         return config;
     }
+
+    public List<String> getLanguages() {
+        return this.languages;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getIntro() {
+        return intro;
+    }
+    
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public boolean getInteractive() {
+        return interactive;
+    }
+
+    public String getLogo() {
+        return logo;
+    }
 }

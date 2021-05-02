@@ -41,10 +41,21 @@ public abstract class SampleCodeGenerator {
     protected String generateFullUrl(String baseUrl, Endpoint endpoint) {
         String path = endpoint.getEndpoint();
         StringBuilder builder = new StringBuilder();
-        builder.append("\"")
-               .append(baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length()-1) : baseUrl)
-               .append("/")
-               .append(path.startsWith("/") ? path.substring(1, baseUrl.length()) : baseUrl);
+        builder.append(baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length()-1) : baseUrl)
+               .append("/");
+        path = path.startsWith("/") ? path.substring(1, path.length()) : path;
+        String[] pathParts = path.split("/");
+        for (int i = 0; i < pathParts.length; i++) {
+            String part = pathParts[i];
+            if (part.startsWith(":")) {
+                part = part.substring(1);  
+            } 
+            builder.append(part);
+            if (i < pathParts.length - 1) {
+                builder.append("/");
+            }
+        }
+               //.append();
         if (endpoint.queryParamLength() > 0) {
             builder.append("?").append(queryParamsToString(endpoint.queryParams()));
         }

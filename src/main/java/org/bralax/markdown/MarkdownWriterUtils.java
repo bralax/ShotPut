@@ -65,4 +65,8 @@ public class MarkdownWriterUtils {
         }
         return "";
     }
+
+    public String dollar() {
+        return "#";
+    }
 }

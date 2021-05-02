@@ -1,8 +1,8 @@
 
-title: $settings.title
+title: ${settings.title}
 
 language_tabs:
-#foreach($language in $settings.languages)
+#foreach($language in ${settings.languages})
     - $language 
 #end
 
@@ -13,7 +13,7 @@ includes:
     - errors.md
     - append.md
 
-logo: $settings.logo
+logo: ${settings.logo}
 
 toc_footers:
 #if($showPostmanCollectionButton)

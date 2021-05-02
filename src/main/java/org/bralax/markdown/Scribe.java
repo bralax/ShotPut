@@ -50,7 +50,7 @@ public class Scribe {
         this.engine.init();
         this.slugify = new Slugify();
         
-        this.baseUrl = this.config.baseUrl;
+        this.baseUrl = config.baseUrl;
         this.generators = generators;
         this.config = config;
         //$this->isStatic = $this->config->get('type') === 'static';

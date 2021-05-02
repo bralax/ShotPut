@@ -7,6 +7,7 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSol
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
+import org.bralax.code.JavaGenerator;
 import org.bralax.code.SampleCodeGenerator;
 import org.bralax.endpoint.Endpoint;
 import org.bralax.endpoint.Parameter;
@@ -32,9 +33,11 @@ public class JavalinDoc {
     private List<SampleCodeGenerator> generators;
     private Config config;
 
-    public JavalinDoc(Config config, File file, boolean excel, boolean html, File out) {
+    public JavalinDoc(Config config, File src, boolean excel, boolean html, File out) {
         this.endpoints = new ArrayList<>();
-        this.file = file;
+        this.generators = new ArrayList<>();
+        registerGenerator(new JavaGenerator());
+        this.file = src;
         this.out = out;
         this.config = config;
         if (!excel && !html) {
