@@ -25,6 +25,7 @@ import com.github.javaparser.ast.visitor.TreeVisitor;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.description.JavadocDescription;
+import com.github.javaparser.javadoc.description.JavadocDescriptionElement;
 import com.github.javaparser.javadoc.description.JavadocSnippet;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration;
@@ -59,7 +60,14 @@ public class CodeParser extends TreeVisitor {
                             Javadoc javadoc = parseJavadoc(comment);
                             List<JavadocBlockTag> tags = new ArrayList<>();
                             tags.addAll(javadoc.getBlockTags());
-                            endpoint.setDescription(javadoc.getDescription().toText());
+                            JavadocDescription desc = javadoc.getDescription();
+                            List<JavadocDescriptionElement> elements = desc.getElements();
+                            if (elements.size() == 1) {
+                                endpoint.setDescription(elements.get(0).toText());
+                            } else if (elements.size() > 1) {
+                                endpoint.setTitle(elements.get(0).toText());
+                                endpoint.setDescription(elements.get(1).toText());
+                            }
                             parseEndpoint(endpoint, tags, call);
                         } else {
                             parseEndpoint(endpoint, new ArrayList<>(), call);
@@ -379,14 +387,30 @@ public class CodeParser extends TreeVisitor {
         Scanner scanner = new Scanner(comm);
         String word = " ";
         StringBuilder description = new StringBuilder();
-        while(scanner.hasNext() && word.charAt(0) != '@') {
+        JavadocDescription desc = new JavadocDescription();
+        if (scanner.hasNextLine()) {
+            String line = scanner.nextLine().trim();
+            if (line.charAt(0) == '@') {
+                word = line;
+            } else {
+                desc.addElement(new JavadocSnippet(line));
+                while(scanner.hasNext() && word.charAt(0) != '@') {
+                    word = scanner.next();
+                    if (word.charAt(0) != '@') {
+                        description.append(" " + word);
+                    }
+                }
+                desc.addElement(new JavadocSnippet(description.toString()));
+            }
+        }
+        /*while(scanner.hasNext() && word.charAt(0) != '@') {
             word = scanner.next();
             if (word.charAt(0) != '@') {
                 description.append(" " + word);
             }
         }
         JavadocDescription desc = new JavadocDescription();
-        desc.addElement(new JavadocSnippet(description.toString()));
+        desc.addElement(new JavadocSnippet(description.toString()));*/
         Javadoc doc = new Javadoc(desc);
         if (word.charAt(0) == '@') {
             while (scanner.hasNext()) {

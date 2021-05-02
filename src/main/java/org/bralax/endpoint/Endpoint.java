@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Endpoint {
+public class Endpoint { 
    private Type type;
    private String endpoint;
    private List<Parameter> pathParams;
@@ -21,6 +21,7 @@ public class Endpoint {
    private boolean authenticated;
    private String group;
 
+   private String title;
    private String description;
    
    public Endpoint() {
@@ -28,6 +29,7 @@ public class Endpoint {
       this.endpoint = "";
       this.responseType = "";
       this.description = "";
+      this.title = "";
       this.pathParams = new ArrayList<>();
       this.queryParams = new ArrayList<>();
       this.formParams = new ArrayList<>();
@@ -45,6 +47,7 @@ public class Endpoint {
       this.endpoint = endpoint;
       this.responseType = "";
       this.description = "";
+      this.title = "";
       this.pathParams = new ArrayList<>();
       this.queryParams = new ArrayList<>();
       this.formParams = new ArrayList<>();
@@ -216,6 +219,14 @@ public class Endpoint {
    
    public String getDescription() {
       return this.description;
+   }
+
+   public void setTitle(String title) {
+      this.title = title;
+   }
+   
+   public String getTitle() {
+      return this.title;
    }
 
    public void setResponseDescription(String description) {

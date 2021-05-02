@@ -37,7 +37,7 @@ Running the system programatically has one extra feature. The JavalinDoc object 
 The system supports using a config file for storing important configs for when generating html. See the provided sample: `exampleConfig.yml`. 
 
 ## Documenting Code
-The system follows a similar set of rules to a traditional javadoc comment. The javadoc comment should be located directly above a call to create a javalin endpoint. The one major difference is that this system uses a seperate set of `@tags` from Javadoc. Currently, **None** of the normal javadoc `@tags` are available in JavalinDoc. The available tags for JavalinDoc are:
+The system follows a similar set of rules to a traditional javadoc comment. The javadoc comment should be located directly above a call to create a javalin endpoint. The first line of the javadoc is the title of the endpoint. All text after the first line until the tags is the description. The The one major difference is that this system uses a seperate set of `@tags` from Javadocs. Currently, **None** of the normal javadoc `@tags` are available in JavalinDoc. The available tags for JavalinDoc are:
 * `@endpoint` - The address of this endpoint. See point 2 under Limitations to see when this is required
 * `@type` - The type of endpoint this is. The type should be in all-caps. This parameter is currently unused but in the future will used when specifying an endpoint outside of Limitation 1. 
 * `@authenticated` - A tag indicating that you need to be logged in to access this endpoint. Has no parameters.
@@ -81,9 +81,9 @@ To do this you need to describe the base form param that needs a rectangle as we
 
 ### Example
 ```JAVA
-    /** This is an example endpoint.
+    /** Example Endpoint
      *  This endpoint does some stuff.
-     *  @endpoint /{age}/
+     *  @endpoint /:age
      *  @type GET
      *  @queryParam name String your name for the system to interpret
      *  @pathParam age Int Required your age for the system to think about
@@ -120,12 +120,12 @@ To give an example:
     }
 
     ```
-    This will notice the call to `javalin.get()` within the get method but it will ignore the call to the wrapper function even if the helper function call in main has a properly structed comment. This means that putting the doc comment at location 1 will not be interpreted but if you put the comment at location 2 the comment will be interpretted.
+    This will notice the call to `javalin.get()` within the get method but it will ignore the call to the wrapper function even if the helper function call in main has a properly structed comment. This means that putting the doc comment at location 1 will not be interpreted but if you put the comment at location 2 the comment will be interpretted. This can cause problems if you wrap access to javalin in helper methods.
 
 
 1. The system can interpret additional information in specific circumstances.
 The system is designed to do some of the work for you but only if you structure your code in a certain way. These "rules"
-are not best practices but rather there due to the limitations of the system. It's best practice not to write your code based on these rules but rather take then into account when looking at what gets automatically recognized by the system. If you do not follow these rules it just requires more information to be documented by hand.
+are not best practices but rather there due to the limitations of the system. It's best practice not to write your code based on these rules but rather take then into account when looking at what gets automatically recognized by the system. The system uses an Abstract Syntax Tree (AST) so it can only determine things that can be found out from the source code prior to running. If you do not follow these rules it just requires more information to be documented by hand.
     1. If the endpoint name is a string constant, the system will interpret it for you and you will not have to use an `@endpoint` tag. 
         For example:
         ```java
@@ -147,6 +147,11 @@ The system is based around maven. To build a jar run:
 `mvn clean compile assembly:single`
 The jar will be located at:
 `target/javalindoc-{version}-jar-with-dependencies.jar`
+
+## Why?
+Javalin has a core maintained plugin for generating OpenApi schemas which could easily converted into documentation.
+That plugin has a few issues that made it hard for me to use in my project. In particular, the documenting mechanism is strange. It use a complex annotation system which could be hard to read for those who have not learned it. I am working on a shared code base where i am the main proponent for documenting. This meant that having a more friendly format (like javadoc) comments were able to lower the barier to entry for the team.
+
 
 ## Credits
 * This library makes use of the [Java Parser](http://javaparser.org) AST Generator
