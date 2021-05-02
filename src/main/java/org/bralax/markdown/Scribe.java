@@ -17,6 +17,8 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
+import org.bralax.Config;
+import org.bralax.code.SampleCodeGenerator;
 import org.bralax.endpoint.Endpoint;
 import org.bralax.html.Pastel;
 
@@ -27,7 +29,11 @@ public class Scribe {
     private VelocityEngine engine;
     private Slugify slugify;
     private String baseUrl;
-    public Scribe(String path) {
+    private List<SampleCodeGenerator> generators;
+    private Config config;
+
+
+    public Scribe(String path, Config config, List<SampleCodeGenerator> generators) {
         // If no config is injected, pull from global. Makes testing easier.
         //$this->config = $config ?: new DocumentationConfig(config('scribe'));
         //$this->baseUrl = $this->config->get('base_url') ?? config('app.url');
@@ -43,8 +49,10 @@ public class Scribe {
         this.engine.setProperty("velocimacro.library", "views/macros/velocimacros.vtl");
         this.engine.init();
         this.slugify = new Slugify();
-        // TODO: Allow for inputted base url
-        this.baseUrl = "http://localhost:3000";
+        
+        this.baseUrl = this.config.baseUrl;
+        this.generators = generators;
+        this.config = config;
         //$this->isStatic = $this->config->get('type') === 'static';
         //$this->staticTypeOutputPath = rtrim($this->config->get('static.output_path', 'public/docs'), '/');
 
@@ -74,21 +82,6 @@ public class Scribe {
     }
 
     public void writeMarkdownAndSourceFiles(Map<String, List<Endpoint>> parsedRoutes) {
-       /* $settings = [
-            'languages' => $this->config->get('example_languages'),
-            'logo' => $this->config->get('logo'),
-            'title' => $this->config->get('title') ?: config('app.name', '') . ' Documentation',
-            'auth' => $this->config->get('auth'),
-            'interactive' => $this->config->get('interactive', true)
-        ];*/
-        List<String> languages = new ArrayList<String>();
-        languages.add("bash");
-        languages.add("javascript");
-        Map<String, Object> settings = new HashMap<>();
-        settings.put("languages", languages);
-        settings.put("logo", false);
-        settings.put("title", "Documentation");
-        settings.put("interactive", true);
 
         System.out.println("Writing source Markdown files to: " + this.sourceOutputPath.toString());
 
@@ -98,8 +91,8 @@ public class Scribe {
 
         //this.fetchLastTimeWeModifiedFilesFromTrackingFile();
 
-        this.writeEndpointsMarkdownFile(parsedRoutes, settings);
-        this.writeIndexMarkdownFile(settings);
+        this.writeEndpointsMarkdownFile(parsedRoutes);
+        this.writeIndexMarkdownFile();
         this.writeAuthMarkdownFile();
 
         //this.writeModificationTimesTrackingFile();
@@ -108,13 +101,13 @@ public class Scribe {
     }
 
 
-    protected void writeEndpointsMarkdownFile(Map<String, List<Endpoint>> parsedRoutes, Map<String, Object> settings)
+    protected void writeEndpointsMarkdownFile(Map<String, List<Endpoint>> parsedRoutes)
     {
         if (!this.sourceOutputPath.resolve("groups/").toFile().exists()) {
             this.sourceOutputPath.resolve("groups").toFile().mkdirs();
         }
 
-        Map<String, List<EndpointWithRender>> parsedRoutesWithOutput = this.generateMarkdownOutputForEachRoute(parsedRoutes, settings);
+        Map<String, List<EndpointWithRender>> parsedRoutesWithOutput = this.generateMarkdownOutputForEachRoute(parsedRoutes);
         for (Map.Entry<String, List<EndpointWithRender>> group: parsedRoutesWithOutput.entrySet()) {
             String groupId = slugify.slugify(group.getKey());
             String filename = this.sourceOutputPath + "/groups/"+groupId+ ".md";
@@ -136,7 +129,7 @@ public class Scribe {
         }
     }
 
-    public Map<String, List<EndpointWithRender>> generateMarkdownOutputForEachRoute(Map<String, List<Endpoint>> parsedRoutes, Map<String, Object> settings)
+    public Map<String, List<EndpointWithRender>> generateMarkdownOutputForEachRoute(Map<String, List<Endpoint>> parsedRoutes)
     {
         Template template = engine.getTemplate("views/partial/endpoint.vtl");
         Map<String, List<EndpointWithRender>> routesWithOutput = new HashMap<>();
@@ -148,9 +141,9 @@ public class Scribe {
                     || route.formParamLength() > 0;
                 VelocityContext context = new VelocityContext();
                 context.put("hasRequestOptions", hasRequestOptions);
-                context.put("util", new MarkdownWriterUtils());
+                context.put("util", new MarkdownWriterUtils(this.baseUrl, this.generators));
                 context.put("baseUrl", this.baseUrl);
-                context.put("settings", settings);
+                context.put("settings", config);
                 context.put("endpointId", route.getType() + route.getEndpoint().replaceAll("[/?{}:]", "-"));
                 context.put("route", route);
                 StringWriter writer = new StringWriter();
@@ -163,7 +156,7 @@ public class Scribe {
         return routesWithOutput;
     }
 
-    protected void writeIndexMarkdownFile(Map<String, Object>  settings)
+    protected void writeIndexMarkdownFile()
     {
         Path indexMarkdownFile = this.sourceOutputPath.resolve("index.md");
         Template front = engine.getTemplate("views/partial/frontmatter.vtl");
@@ -173,20 +166,17 @@ public class Scribe {
         frontCTX.put("postmanCollectionLink", "./collection.json");
         frontCTX.put("openAPISpecLink", "./openapi.yaml");
         frontCTX.put("outputPath", "docs");
-        frontCTX.put("settings", settings);
+        frontCTX.put("settings", config);
         StringWriter fwriter = new StringWriter();
         front.merge(frontCTX, fwriter);
 
-        // TODO: Allow intro text
-        String introText = "";
         Template index = engine.getTemplate("views/markdownIndex.vtl");
         VelocityContext indexCTX = new VelocityContext();
         indexCTX.put("frontmatter", fwriter.toString());
-        // TODO: Allow for General Description
-        indexCTX.put("description", "");
-        indexCTX.put("introText", introText);
+        indexCTX.put("description", config.description);
+        indexCTX.put("introText", config.intro);
         indexCTX.put("baseUrl", this.baseUrl);
-        indexCTX.put("isInteractive", settings.get("interactive"));
+        indexCTX.put("isInteractive", config.interactive);
         StringWriter iwriter = new StringWriter();
         index.merge(indexCTX, iwriter);
         try {

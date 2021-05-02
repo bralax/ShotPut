@@ -7,10 +7,12 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSol
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
-
+import org.bralax.code.SampleCodeGenerator;
 import org.bralax.endpoint.Endpoint;
 import org.bralax.endpoint.Parameter;
 import org.bralax.markdown.Scribe;
+
+import io.javalin.Javalin;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,11 +29,14 @@ public class JavalinDoc {
     private boolean excel;
     private boolean html;
     private File out;
+    private List<SampleCodeGenerator> generators;
+    private Config config;
 
-    public JavalinDoc(File file, boolean excel, boolean html, File out) {
+    public JavalinDoc(Config config, File file, boolean excel, boolean html, File out) {
         this.endpoints = new ArrayList<>();
         this.file = file;
         this.out = out;
+        this.config = config;
         if (!excel && !html) {
             this.excel = true;
             this.html = true;
@@ -41,6 +46,11 @@ public class JavalinDoc {
         }
     }
 
+    public JavalinDoc registerGenerator(SampleCodeGenerator generator) {
+        this.generators.add(generator);
+        return this;
+    }
+
     public void start() throws IOException {
         CombinedTypeSolver solver = new CombinedTypeSolver();
         solver.add(new ReflectionTypeSolver());
@@ -48,9 +58,6 @@ public class JavalinDoc {
         JavaSymbolSolver symbolSolver = new JavaSymbolSolver(solver);
         JavaParser.getStaticConfiguration().setSymbolResolver(symbolSolver);
         this.parse(this.file);
-        /*CompilationUnit unit =  JavaParser.parse(this.file.toPath());
-        new VisitAll().visitPreOrder(unit);
-        System.out.println(endpoints);*/
         if (this.excel) {
             this.generateExcel();
         }
@@ -165,7 +172,7 @@ public class JavalinDoc {
     }
 
     private void generateHTML() throws IOException{
-        new Scribe(out.getAbsolutePath()).writeDocs(this.groupEndpoints(endpoints));
+        new Scribe(out.getAbsolutePath(), this.config, this.generators).writeDocs(this.groupEndpoints(endpoints));
     }
 
     private Map<String, List<Endpoint>> groupEndpoints(List<Endpoint> endpoints) {

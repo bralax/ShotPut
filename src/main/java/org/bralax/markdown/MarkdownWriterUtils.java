@@ -2,11 +2,20 @@ package org.bralax.markdown;
 
 import java.util.Map;
 
+import org.bralax.code.SampleCodeGenerator;
 import org.bralax.endpoint.Endpoint;
 
 import static java.util.Map.entry;
 
+import java.util.List;
+
 public class MarkdownWriterUtils {
+    private List<SampleCodeGenerator> gens;
+    private String baseUrl;
+    public MarkdownWriterUtils(String baseUrl, List<SampleCodeGenerator> generators) {
+        this.gens = generators;
+        this.baseUrl = baseUrl;
+    }
     public static Map<String, String> methodColor = Map.ofEntries(
         entry("GET", "green"),
         entry("HEAD", "darkgreen"),
@@ -49,6 +58,11 @@ public class MarkdownWriterUtils {
     }
 
     public String generateRequestForEndpoint(String language, Endpoint endpoint) {
+        for (SampleCodeGenerator gen: this.gens) {
+            if (language.equals(gen.getType())) {
+                return gen.generate(this.baseUrl, endpoint);
+            }
+        }
         return "";
     }
 }

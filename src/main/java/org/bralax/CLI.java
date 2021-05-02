@@ -14,6 +14,7 @@ public class CLI {
         Options options = new Options();
         //options.addOption(Option.builder("s").longOpt("css").desc("The css file to be used on the html").hasArg().required(false).build());
         options.addOption(Option.builder("cp").longOpt("classpath").desc("The files to parse (Required)").hasArg().required(true).build());
+        options.addOption(Option.builder("c").longOpt("config").desc("A Configuration file path").hasArg().required(false).build());
         options.addOption(Option.builder("o").longOpt("outdir").desc("The place to put the generated files (Required)").hasArg().required(true).build());
         options.addOption(Option.builder("x").longOpt("excel").desc("Flag to generate excel file. If this flag and -h are not set both will be generated").required(false).build());
         options.addOption(Option.builder("h").longOpt("html").desc("Flag to generate html file. If this flag and -h are not set both will be generated").required(false).build());
@@ -27,6 +28,13 @@ public class CLI {
             } else {
                 String outDir = commandLine.getOptionValue("o");
                 String classPath = commandLine.getOptionValue("cp");
+                String config = commandLine.getOptionValue("c", null);
+                Config configuration;
+                if (config == null) {
+                    configuration = Config.defaultValue();
+                } else {
+                    configuration = ConfigParser.parseConfig(config);
+                }
                 //String css = commandLine.getOptionValue("s", "test.css");
                 boolean excel = commandLine.hasOption("x");
                 boolean html = commandLine.hasOption("h");
@@ -34,7 +42,7 @@ public class CLI {
                 File out = new File(outDir);
                 if (file.exists() && out.exists()) {
                     if (out.isDirectory()) {
-                        new JavalinDoc(file, excel, html, out).start();
+                        new JavalinDoc(configuration, file, excel, html, out).start();
                     } else {
                         System.out.println("The output directory must be a folder");
                     }
