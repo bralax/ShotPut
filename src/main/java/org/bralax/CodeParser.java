@@ -90,6 +90,7 @@ public class CodeParser extends TreeVisitor {
     private void parseEndpoint(Endpoint endpoint, List<JavadocBlockTag> tags, MethodCallExpr call) {
         endpoint.setType(Endpoint.Type.valueOf(call.getNameAsString().toUpperCase()));
         getCommentTag(tags, "type");
+        
         if (call.getArgument(0) instanceof StringLiteralExpr) {
             endpoint.setEndpoint(((StringLiteralExpr)call.getArgument(0)).asString());
             getCommentTag(tags, "endpoint");
@@ -110,16 +111,7 @@ public class CodeParser extends TreeVisitor {
         for (JavadocBlockTag tag: tags) {
             String content = tag.getContent().toText().strip();
             String tagName = tag.getTagName();
-            if (tagName.equals("endpoint")) {
-                endpoint.setEndpoint(content);
-            } else if (tagName.equals("type")) {
-                endpoint.setType(Endpoint.Type.valueOf(content));
-            } else if (tagName.equals("authenticated")) {
-                endpoint.setAuthenticated(true);
-            } else if (tagName.equals("group")) {
-                endpoint.setGroup(content);
-            } else if (tagName.equals(""))
-            switch (tag.getTagName()) {
+            switch (tagName) {
                 case "endpoint":
                     endpoint.setEndpoint(content);
                     break;
@@ -152,7 +144,7 @@ public class CodeParser extends TreeVisitor {
                     paramType = next;
                     if (parser.hasNext()) {
                         next = parser.next();
-                        if (next.equals("required")) {
+                        if (next.equalsIgnoreCase("required")) {
                             required = true;
                             content = getContent(parser);
                         } else {
@@ -161,7 +153,7 @@ public class CodeParser extends TreeVisitor {
                     } else {
                         content = "";
                     }
-                } else if (next.equals("required")) {
+                } else if (next.equalsIgnoreCase("Required")) {
                     paramType = "String";
                     required = true;
                     content = getContent(parser);
@@ -186,6 +178,7 @@ public class CodeParser extends TreeVisitor {
                     endpoint.addQueryParam(newParam);
                     break;
                 case "pathParam":
+                    newParam.setRequired(true);
                     endpoint.addPathParam(newParam);
                     break;
                 case "bodyParam":
@@ -325,6 +318,7 @@ public class CodeParser extends TreeVisitor {
                     case "queryParam":
                         if (call.getArgument(0) instanceof StringLiteralExpr) {
                             JavadocBlockTag tag = getCommentTag(tags,"queryParam",((StringLiteralExpr) call.getArgument(0)).asString());
+                            System.out.println("Found Tag: \t"+ tag);
                             if (tag != null) {
                                 parseParameterJavadoc(endpoint, tag);
                             } else {
@@ -384,13 +378,13 @@ public class CodeParser extends TreeVisitor {
         comm = comm.replace("/**", "");
         comm = comm.replace("*/", "");
         comm = comm.replace("*", "");
-        Scanner scanner = new Scanner(comm);
+        Scanner scanner = new Scanner(comm.trim());
         String word = " ";
         StringBuilder description = new StringBuilder();
         JavadocDescription desc = new JavadocDescription();
         if (scanner.hasNextLine()) {
             String line = scanner.nextLine().trim();
-            if (line.charAt(0) == '@') {
+            if (line.length() > 0 && line.charAt(0) == '@') {
                 word = line;
             } else {
                 desc.addElement(new JavadocSnippet(line));
@@ -426,7 +420,7 @@ public class CodeParser extends TreeVisitor {
                         content.append(" " + word);
                     }
                 }
-                doc.addBlockTag(tag, content.toString());
+                doc.addBlockTag(tag, content.toString().trim());
             }
         }
         scanner.close();

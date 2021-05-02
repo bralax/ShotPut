@@ -86,12 +86,10 @@ public class Pastel {
             Node firstChild = document.getFirstChild();
             Map<String, Object> frontMatterData = new HashMap<>();
             if (firstChild instanceof YamlFrontMatterBlock) {
-                System.out.println("First Block is Yaml");
                 YamlFrontMatterBlock frontmatter = (YamlFrontMatterBlock) firstChild;
                 //handle the frontmatter
                 YamlFrontMatterVisitor visitor = new YamlFrontMatterVisitor();
                 frontmatter.accept(visitor);
-                System.out.println("Visitor Data:" +visitor.getData());
                 Map<String, List<String>> frontData = visitor.getData();
                 List<String> filePathsToInclude = new ArrayList<>();
                 for (Entry<String, List<String>> item: frontData.entrySet()) {
@@ -108,46 +106,22 @@ public class Pastel {
                     }
                     for (String filename: filePathsToInclude) {
                         Path path = Path.of(filename);
-                        /*if (filename.contains("*")) {
-                            /*
-                            foreach (glob($filePath) as $file) {
-                                if (!in_array($file, ['.', '..'])) {
-                                    $html .= $parser->parse(file_get_contents($file))->getContent();
-                                }
-                            }
-                            
-                        } else {*/
                         if (!path.toFile().exists()) {
                             System.out.println("Include file " + filename + " not found.");
                         } else if (path.toFile().isDirectory()) {
                             for( File f: path.toFile().listFiles()) {
                                 if (f.isFile() && f.getName().endsWith(".md")) {
                                     Node item = parser.parse(Files.readString(f.toPath()));
-                                    /*Node child = item.getFirstChild();
-                                    System.out.println(child);
-                                    System.out.println(item.getNext());
-                                    System.out.println(item.getLastChild());
-                                    while(child != null) {
-                                        document.appendChild(child);
-                                        child = child.getNext();
-                                        System.out.println("NEXT: " +  child);
-                                    }*/
                                     item.accept(new CopyVisitor(document));
                                 } 
                             }
                         } else {
                             Node item = parser.parse(Files.readString(path));
                             item.accept(new CopyVisitor(document));
-                            /*Node child = item.getFirstChild();
-                            while(child != null) {
-                                document.appendChild(child);
-                                child = child.getNext();
-                            }*/
                         }
-                        //}
                     }
                 }
-                if (!frontData.containsKey("last_updated")) {//$frontmatter['last_updated'])) {
+                if (!frontData.containsKey("last_updated")) {
                     // Set last_updated to most recent time main or include files was modified
                     long time = 0l;
                     for (String file: filePathsToInclude) {

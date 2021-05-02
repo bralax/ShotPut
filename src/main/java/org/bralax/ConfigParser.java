@@ -27,7 +27,6 @@ public class ConfigParser {
                 //handle the frontmatter
                 YamlFrontMatterVisitor visitor = new YamlFrontMatterVisitor();
                 frontmatter.accept(visitor);
-                System.out.println("Visitor Data:" +visitor.getData());
                 Map<String, List<String>> frontData = visitor.getData();
                 Config config = new Config();
                 if (frontData.containsKey("title") && !frontData.get("title").isEmpty()) {

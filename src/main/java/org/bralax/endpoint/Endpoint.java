@@ -47,7 +47,7 @@ public class Endpoint {
       this.endpoint = endpoint;
       this.responseType = "";
       this.description = "";
-      this.title = "";
+      this.title = endpoint;
       this.pathParams = new ArrayList<>();
       this.queryParams = new ArrayList<>();
       this.formParams = new ArrayList<>();
@@ -226,7 +226,7 @@ public class Endpoint {
    }
    
    public String getTitle() {
-      return this.title;
+      return this.title == null || this.title.length() == 0 ? this.endpoint : this.title;
    }
 
    public void setResponseDescription(String description) {

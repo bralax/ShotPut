@@ -50,7 +50,7 @@ public class Parameter {
    
    @Override
    public String toString() {
-      return "{Name: "+this.name+", Description: "+this.description+"}";
+      return "{Name: "+this.name+", Type: "+this.type+", Required: "+this.required+", Description: "+this.description+"}";
    }
 
 }

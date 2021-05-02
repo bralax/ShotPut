@@ -1,15 +1,15 @@
 #macro( badge $color $text ) 
-    <small class="badge badge-$color">$text</small>
+<small class="badge badge-$color">$text</small>
 #end
 
 #macro( authBadge $authed)
-    #if ($authed)
-        #badge( "darkred" "requires authentication")
-    #end
+#if ($authed)
+#badge( "darkred" "requires authentication")
+#end
 #end
 
 #macro( methodBadge $util $method)
-    #badge(${util.methodToColor(${method})} $method)
+#badge(${util.methodToColor(${method})} $method)
 #end
 
 #macro( fieldDetail $name $type $required $description $endpointId $component)
