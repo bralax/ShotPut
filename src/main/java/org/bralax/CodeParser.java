@@ -2,17 +2,21 @@ package org.bralax;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.Set;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.IntegerLiteralExpr;
 import com.github.javaparser.ast.expr.LambdaExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.MethodReferenceExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
@@ -22,33 +26,33 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.visitor.TreeVisitor;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.description.JavadocDescription;
 import com.github.javaparser.javadoc.description.JavadocDescriptionElement;
 import com.github.javaparser.javadoc.description.JavadocSnippet;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
-import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration;
 
 import org.bralax.endpoint.Endpoint;
 import org.bralax.endpoint.Parameter;
 
 public class CodeParser extends TreeVisitor {
 
-    private List<Endpoint> endpoints;
+    private Set<Endpoint> endpoints;
     public CodeParser() {
-        this.endpoints = new ArrayList<>();
+        this.endpoints = new HashSet<>();
     }
 
     public List<Endpoint> getEndpoints() {
-        return this.endpoints;
+        return Arrays.asList(this.endpoints.toArray(new Endpoint[this.endpoints.size()]));
     }
     @Override
     public void process(Node node) {
         if (node instanceof ExpressionStmt) {
             ExpressionStmt stmt = (ExpressionStmt) node;
             if (stmt.getExpression() instanceof MethodCallExpr) {
-                
                 MethodCallExpr call = (MethodCallExpr) stmt.getExpression();
                 Optional<Expression> exp = call.getScope();
                 if (exp.isPresent() && exp.get() instanceof NameExpr) {
@@ -69,10 +73,17 @@ public class CodeParser extends TreeVisitor {
                                 endpoint.setDescription(elements.get(1).toText());
                             }
                             parseEndpoint(endpoint, tags, call);
+                            if (this.endpoints.contains(endpoint)) {
+                                this.endpoints.remove(endpoint);
+                            }
+                            this.endpoints.add(endpoint);
                         } else {
                             parseEndpoint(endpoint, new ArrayList<>(), call);
+                            if (!this.endpoints.contains(endpoint)) {
+                                this.endpoints.add(endpoint);
+                            }
                         }
-                        this.endpoints.add(endpoint);
+                        
                     }
 
                     
@@ -82,6 +93,49 @@ public class CodeParser extends TreeVisitor {
                 //call.getArguments() -> the parameters passed to the method
                 //call.getScope() -> the caller
                 //getSymbol(((NameExpr) exp.get())).equals('io.javalin.Javalin') -> is a endpoint
+            }
+        } else if (node instanceof MethodDeclaration) {
+            MethodDeclaration decl = (MethodDeclaration) node;
+            NodeList<com.github.javaparser.ast.body.Parameter> parameters = decl.getParameters();
+            if (parameters.size() == 1) {
+                com.github.javaparser.ast.body.Parameter parameter = parameters.get(0);
+                Type paramType = parameter.getType();
+                if (paramType instanceof ClassOrInterfaceType && ((ClassOrInterfaceType) paramType).getNameAsString().endsWith("Context")) {
+                    Endpoint endpoint = new Endpoint();
+                    if (decl.getComment().isPresent() && decl.getComment().get() instanceof JavadocComment) {
+                        JavadocComment comment = (JavadocComment) decl.getComment().get();
+                        Javadoc javadoc = parseJavadoc(comment);
+                        List<JavadocBlockTag> tags = new ArrayList<>();
+                        tags.addAll(javadoc.getBlockTags());
+                        JavadocDescription desc = javadoc.getDescription();
+                        List<JavadocDescriptionElement> elements = desc.getElements();
+                        if (elements.size() == 1) {
+                            endpoint.setDescription(elements.get(0).toText());
+                        } else if (elements.size() > 1) {
+                            endpoint.setTitle(elements.get(0).toText());
+                            endpoint.setDescription(elements.get(1).toText());
+                        }
+                        JavadocBlockTag typeTag = getCommentTag(tags, "type");
+                        if (typeTag != null) {
+                            endpoint.setType(typeTag.getContent().toText().strip());
+                        } else {
+                            return;
+                        }
+                        JavadocBlockTag endpointTag = getCommentTag(tags, "endpoint");
+                        if (endpointTag != null) {
+                            endpoint.setEndpoint(endpointTag.getContent().toText().strip());
+                        } else {
+                            return;
+                        }
+                        parseMethodDeclaration(decl, endpoint, tags);
+                        parseJavadocTags(endpoint, tags);
+                        System.out.println(endpoint);
+                        if (this.endpoints.contains(endpoint)) {
+                            this.endpoints.remove(endpoint);
+                        }
+                        this.endpoints.add(endpoint);
+                    }
+                }
             }
         }
     } 
@@ -102,6 +156,8 @@ public class CodeParser extends TreeVisitor {
         }
         if (call.getArgument(1) instanceof LambdaExpr) {
             parseLambdaExpression((LambdaExpr)call.getArgument(1), endpoint, tags);
+        } else if (call.getArgument(1) instanceof MethodReferenceExpr){
+            parseMethodReference(call.getArgument(1).asMethodReferenceExpr(), endpoint, tags);
         }
         parseJavadocTags(endpoint, tags);
     }
@@ -212,11 +268,27 @@ public class CodeParser extends TreeVisitor {
         return builder.toString();
     }
 
+    private void parseMethodReference(MethodReferenceExpr expr, Endpoint endpoint, List<JavadocBlockTag> tags ) {
+        /*System.out.println(expr.asMethodReferenceExpr().resolve());
+        ResolvedMethodDeclaration type = expr.resolve();
+        System.out.println(type);*/
+    }
+
     private void parseLambdaExpression(LambdaExpr expr, Endpoint endpoint, List<JavadocBlockTag> tags) {
         String ctx = expr.getParameter(0).getNameAsString();
         Statement e = expr.getBody();
         if (e instanceof BlockStmt) {
             NodeList<Statement> stmts = ((BlockStmt) e).getStatements();
+            parseLambdaStatements(stmts, endpoint, tags, ctx);
+        }
+
+    }
+
+    private void parseMethodDeclaration(MethodDeclaration expr, Endpoint endpoint, List<JavadocBlockTag> tags) {
+        String ctx = expr.getParameter(0).getNameAsString();
+        Optional<BlockStmt> e = expr.getBody();
+        if (e.isPresent()) {
+            NodeList<Statement> stmts = e.get().getStatements();
             parseLambdaStatements(stmts, endpoint, tags, ctx);
         }
 
@@ -434,8 +506,7 @@ public class CodeParser extends TreeVisitor {
 
     static String getSymbol(NameExpr expr) {
         try {
-            ResolvedValueDeclaration dec = expr.resolve();
-            return dec.getType().describe();
+            return expr.calculateResolvedType().describe();
         } catch (UnsolvedSymbolException exception) {
             return exception.toString();
         } catch (RuntimeException exception) {

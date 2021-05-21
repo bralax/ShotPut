@@ -42,7 +42,7 @@ public class CLI {
                 File out = new File(outDir);
                 if (file.exists() && out.exists()) {
                     if (out.isDirectory()) {
-                        new JavalinDoc(configuration, file, excel, html, out).start();
+                        new Shotput(configuration, file, excel, html, out).start();
                     } else {
                         System.out.println("The output directory must be a folder");
                     }

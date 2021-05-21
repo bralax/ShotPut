@@ -1,9 +1,9 @@
-# Javalin Doc
+# ShotPut
 ## What is this?
 This library serves as a way to quickly and easily document [Javalin](https://javalin.io) endpoints.
 ## How to use
 The system is distributed as a .jar file that you can download on the Github releases page or generate from this source code.
-`java -jar javalinDoc.jar {command-line parameters}`
+`java -jar shotput.jar {command-line parameters}`
 ```
 usage: javalin-doc
  -?,--help               Print the Help Menu

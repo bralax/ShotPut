@@ -142,7 +142,6 @@ public class Pastel {
             HtmlRenderer renderer = HtmlRenderer.builder().extensions(extensions).build();
             String htmlContent = renderer.render(document);
             Map<String, Object> metadata = this.getPageMetadata(frontMatterData, metadataOverrides);
-            System.out.println(metadata);
             VelocityEngine engine = new VelocityEngine();
             engine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath"); 
             engine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());

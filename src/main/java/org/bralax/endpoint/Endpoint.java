@@ -2,6 +2,7 @@ package org.bralax.endpoint;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -277,6 +278,11 @@ public class Endpoint {
          return this.type.equals(other.type) && this.endpoint.equals(other.endpoint);
       }
       return false;
+   }
+
+   @Override
+   public int hashCode() {
+      return Objects.hash(this.type.toString(), this.endpoint);
    }
 
 

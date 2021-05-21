@@ -1,10 +1,11 @@
 package org.bralax;
 
-import com.github.javaparser.JavaParser;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
 import org.bralax.code.JavaGenerator;
@@ -24,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class JavalinDoc {
+public class Shotput {
     private List<Endpoint> endpoints;
     private File file;
     private boolean excel;
@@ -33,7 +34,7 @@ public class JavalinDoc {
     private List<SampleCodeGenerator> generators;
     private Config config;
 
-    public JavalinDoc(Config config, File src, boolean excel, boolean html, File out) {
+    public Shotput(Config config, File src, boolean excel, boolean html, File out) {
         this.endpoints = new ArrayList<>();
         this.generators = new ArrayList<>();
         registerGenerator(new JavaGenerator());
@@ -49,7 +50,7 @@ public class JavalinDoc {
         }
     }
 
-    public JavalinDoc registerGenerator(SampleCodeGenerator generator) {
+    public Shotput registerGenerator(SampleCodeGenerator generator) {
         this.generators.add(generator);
         return this;
     }
@@ -58,8 +59,9 @@ public class JavalinDoc {
         CombinedTypeSolver solver = new CombinedTypeSolver();
         solver.add(new ReflectionTypeSolver());
         solver.add(new JarTypeSolver(getClass().getClassLoader().getResource("javalin-3.9.1.jar").openStream()));
+        solver.add(new JavaParserTypeSolver(this.file));
         JavaSymbolSolver symbolSolver = new JavaSymbolSolver(solver);
-        JavaParser.getStaticConfiguration().setSymbolResolver(symbolSolver);
+        StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
         this.parse(this.file);
         if (this.excel) {
             this.generateExcel();
@@ -75,7 +77,7 @@ public class JavalinDoc {
                 this.parse(file);
             }
         } else if (f.getName().endsWith(".java")) {
-            CompilationUnit unit =  JavaParser.parse(f.toPath());
+            CompilationUnit unit =  StaticJavaParser.parse(f.toPath());
             CodeParser parser = new CodeParser();
             parser.visitPreOrder(unit);
             List<Endpoint> newEndpoints = parser.getEndpoints();
