@@ -13,8 +13,12 @@ import org.bralax.code.SampleCodeGenerator;
 import org.bralax.endpoint.Endpoint;
 import org.bralax.endpoint.Parameter;
 import org.bralax.markdown.Scribe;
+import org.bralax.openapi.OpenApiGenerator;
+import org.bralax.parser.CodeParser;
 
 import io.javalin.Javalin;
+import io.swagger.util.Json;
+import io.swagger.v3.oas.models.OpenAPI;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,14 +37,16 @@ public class Shotput {
     private File out;
     private List<SampleCodeGenerator> generators;
     private Config config;
+    private boolean swagger;
 
-    public Shotput(Config config, File src, boolean excel, boolean html, File out) {
+    public Shotput(Config config, File src, boolean excel, boolean html, boolean swagger, File out) {
         this.endpoints = new ArrayList<>();
         this.generators = new ArrayList<>();
         registerGenerator(new JavaGenerator());
         this.file = src;
         this.out = out;
         this.config = config;
+        this.swagger = swagger;
         if (!excel && !html) {
             this.excel = true;
             this.html = true;
@@ -68,6 +74,9 @@ public class Shotput {
         }
         if (this.html) {
             this.generateHTML();
+        }
+        if (this.swagger) {
+            this.generateOpenApi();
         }
     }
 
@@ -178,6 +187,19 @@ public class Shotput {
 
     private void generateHTML() throws IOException{
         new Scribe(out.getAbsolutePath(), this.config, this.generators).writeDocs(this.groupEndpoints(endpoints));
+    }
+
+
+    private void generateOpenApi() {
+       OpenAPI api = new OpenApiGenerator(config).generate(endpoints);
+       try {
+        PrintWriter printWriter = new PrintWriter(this.out.getAbsolutePath() + "/openapi.json");
+        printWriter.print(Json.pretty().writeValueAsString(api));
+        printWriter.flush();
+        printWriter.close();
+       } catch (IOException ex) {
+            System.err.println("Failed to generate OpenApi Spec!");
+       }
     }
 
     private Map<String, List<Endpoint>> groupEndpoints(List<Endpoint> endpoints) {

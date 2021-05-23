@@ -17,6 +17,7 @@ public class CLI {
         options.addOption(Option.builder("c").longOpt("config").desc("A Configuration file path").hasArg().required(false).build());
         options.addOption(Option.builder("o").longOpt("outdir").desc("The place to put the generated files (Required)").hasArg().required(true).build());
         options.addOption(Option.builder("x").longOpt("excel").desc("Flag to generate excel file. If this flag and -h are not set both will be generated").required(false).build());
+        options.addOption(Option.builder("s").longOpt("swagger").desc("Flag to generate swagger/openapi documentation.").required(false).build());
         options.addOption(Option.builder("h").longOpt("html").desc("Flag to generate html file. If this flag and -h are not set both will be generated").required(false).build());
         options.addOption(Option.builder("?").longOpt("help").desc("Print the Help Menu").required(false).build());
         CommandLineParser parser = new DefaultParser();
@@ -38,11 +39,12 @@ public class CLI {
                 //String css = commandLine.getOptionValue("s", "test.css");
                 boolean excel = commandLine.hasOption("x");
                 boolean html = commandLine.hasOption("h");
+                boolean swagger = commandLine.hasOption("s");
                 File file = new File(classPath);
                 File out = new File(outDir);
                 if (file.exists() && out.exists()) {
                     if (out.isDirectory()) {
-                        new Shotput(configuration, file, excel, html, out).start();
+                        new Shotput(configuration, file, excel, html, swagger, out).start();
                     } else {
                         System.out.println("The output directory must be a folder");
                     }
