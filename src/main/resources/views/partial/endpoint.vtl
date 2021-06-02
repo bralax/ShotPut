@@ -12,15 +12,15 @@ $util.generateRequestForEndpoint($language, $route)
 
 #if( $route.method == "GET")
 #foreach($response in $route.exampleResponse)
-> Example response $response.name:
+> Example response $response.statusCode:
 
 ```json
-#if($response.description && $response.description.startsWith("<<binary>>")) 
-<Binary data> - $response.description.replace("<<binary>>", "")
+#if($response.example && $response.example.startsWith("<<binary>>")) 
+<Binary data> - $response.example.replace("<<binary>>", "")
 #elseif($response.name == "204")
 <Empty response>
 #else 
-$response.description
+$response.example
 #end
 ```
 #end

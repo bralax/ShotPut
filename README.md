@@ -16,7 +16,7 @@ usage: javalin-doc
                          are not set both will be generated
 ```
 Unlike Javadoc, we will not create a docs folder for you. You have to specify an existing folder where you would like the documetation stored.
-Also the classpath is the folder containing the source code you would like to document. You can only supply one folder at time.
+Also the classpath is the folder containing the source code you would like to document. You can only supply one folder at time. 
 
 ### Running the Documentation engine Programmatically
 The core class of the Documentation Engine is  `org.bralax.JavalinDoc`. To generate documentation, you need to create an instance of that class and then call it's start method.
@@ -44,10 +44,10 @@ The system follows a similar set of rules to a traditional javadoc comment. The 
 * `@queryParam` - A query parameter that the system requests. Should be in the format `@queryParam {parameter} {type} [Required] {description}`
 * `@pathParam` - A path parameter that the system requests. Currently all path parameters are required. Should be in the format `@pathParam {parameter} {type} {description}`
 * `@formParam` - A form parameter that the system requests. Form parameters have the ability to be "leveled". See section below on Objects and Arrays for how this works. Should be in the format `@formParam {parameter} {type} [Required] {description}`
-* `@requestHeader` - A request header that the system requests. Should be in the format `@tag {parameter} {type} [Required] {description}`
-* `@responseHeader` - A response header that the system returns. Should be in the format `@tag {parameter} {type} [Required] {description}`
-* `@exampleResponse` - A example response for the endpoint. Should be of the form: `@tag {description} : {example response}`
-* `@responseStatus` - A status code that the system could return. Should be in the format `@tag {code} {reason for code}`
+* `@requestHeader` - A request header that the system requests. Should be in the format `@requestHeader {parameter} {type} [Required] {description}`
+* `@responseHeader` - A response header that the system returns. Should be in the format `@responseHeader {parameter} {type} [Required] {description}`
+* `@response` - A example response for the endpoint. Should be of the form: `@response {statusCode} ["{reason}"] {example response}`
+* `@responseField` - A field found in a response to be used when return type is json. `@responseField {parameter} {type} [Required] {description}`
 * `@responseType` - The format of data the system returns (json, text, html).
 
 The parameter type can be one of following:
@@ -98,32 +98,34 @@ To do this you need to describe the base form param that needs a rectangle as we
 
 ## Limitations
 The system is currently limited in what it can interpret. 
-1. The system can only interpret explicity defined endpoints
-What this means is that the system will only notice when you directly call a method on the javalin object (currently).
-To give an example:
-    ```java
-    public class Example {
+1. The system can only find documentation in two locations:
+   1. A declaration of a method that takes in 1 parameter (A Javalin Context) (`public void endpoint(Context ctx)`)
+   2. Any call to declaring a endpoint on the Javalin object (`javalin.get(...)` etc.)
+      * The system can only interpret explicity defined endpoints
+            What this means is that the system will only notice when you directly call a method on the javalin object (currently).
+            To give an example:
+                ```java
+                public class Example {
 
-        public static void main(String[] args) {
-            ...
-            /** 1
-             * ...
-            */
-            get("some endpoint");
-            ...
-        }
+                    public static void main(String[] args) {
+                        ...
+                        /** 1
+                        * ...
+                        */
+                        get("some endpoint");
+                        ...
+                    }
 
-        public static void get(String endpoint) {
-            ...2
-            javalin.get(endpoint, ctx ->{...});
-        }
-    }
+                    public static void get(String endpoint) {
+                        ...2
+                        javalin.get(endpoint, ctx ->{...});
+                    }
+                }
 
-    ```
-    This will notice the call to `javalin.get()` within the get method but it will ignore the call to the wrapper function even if the helper function call in main has a properly structed comment. This means that putting the doc comment at location 1 will not be interpreted but if you put the comment at location 2 the comment will be interpretted. This can cause problems if you wrap access to javalin in helper methods.
+                ```
+                This will notice the call to `javalin.get()` within the get method but it will ignore the call to the wrapper function even if the helper function call in main has a properly structed comment. This means that putting the doc comment at location 1 will not be interpreted but if you put the comment at location 2 the comment will be interpretted. This can cause problems if you wrap access to javalin in helper methods.
 
-
-1. The system can interpret additional information in specific circumstances.
+2. The system can interpret additional information in specific circumstances.
 The system is designed to do some of the work for you but only if you structure your code in a certain way. These "rules"
 are not best practices but rather there due to the limitations of the system. It's best practice not to write your code based on these rules but rather take then into account when looking at what gets automatically recognized by the system. The system uses an Abstract Syntax Tree (AST) so it can only determine things that can be found out from the source code prior to running. If you do not follow these rules it just requires more information to be documented by hand.
     1. If the endpoint name is a string constant, the system will interpret it for you and you will not have to use an `@endpoint` tag. 
@@ -138,7 +140,7 @@ are not best practices but rather there due to the limitations of the system. It
         ```
         The endpoint will have to be manually specified as internally the system can not determine the runtime value of this variable.
     
-    2. If the endpoint handler is a lambda function `ctx -> {...}` the system will run through the function and try to pull out important pieces of information. It will look for every call to `.queryParam`, `.formParam`,`.pathParam`,`.status` and more to build out a skeleton of the information that needs to be provided in the javadoc comment. Currently this process of interpretting the content of an endpoint can only be done on a lambda expression. This is due to a current system limitation in which it can not currently locate a function outside the scope of the current function. Also similar to 1, a call to these methods will be ignored if the "field" parameter in the call is a variable not a constant.
+    2. If you document on the endpoint registration and the handler is a lambda function `ctx -> {...}` or you document on a method declaration the system will run through the function and try to pull out important pieces of information. It will look for every call to `.queryParam`, `.formParam`,`.pathParam`,`.status` and more to build out a skeleton of the information that needs to be provided in the javadoc comment. Currently, if you write the comment on the endpoint registration, this process of interpretting the content of an endpoint can only be done on a lambda expression. This is due to a current system limitation in which it can not currently locate a function outside the scope of the current function. 
 
 
 ## Building
