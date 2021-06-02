@@ -19,16 +19,16 @@ Unlike Javadoc, we will not create a docs folder for you. You have to specify an
 Also the classpath is the folder containing the source code you would like to document. You can only supply one folder at time. 
 
 ### Running the Documentation engine Programmatically
-The core class of the Documentation Engine is  `org.bralax.JavalinDoc`. To generate documentation, you need to create an instance of that class and then call it's start method.
+The core class of the Documentation Engine is  `io.github.bralax.shotput.Shotput`. To generate documentation, you need to create an instance of that class and then call it's start method.
 The JavalinDoc constructor takes in the following parameters:
-* Config config -> An `org.bralax.Config` object with the settings for generating documentation
+* Config config -> An `io.github.bralax.shotput.Config` object with the settings for generating documentation
 * File src -> The folder that contains java files or the java file to parse
 * boolean excel -> Whether to produce csv documentation
 * boolean html -> Whether to produce html documentation
 * File out -> The folder to place the documentation in
 
 Running the system programatically has one extra feature. The JavalinDoc object has one extra method, `registerGenerator`. It can be called to register a sample code generator for a specific language. A sample code generator should extend
-`org.bralax.code.SampleCodeGenerator` and implement these method:
+`io.github.bralax.shotput.code.SampleCodeGenerator` and implement these method:
 * `public String getType()` -> Should return the language this generator supports
 * `public String generate(String baseUrl, Endpoint endpoint)` -> should create a markdown code block that will create a request for this endpoint.
 

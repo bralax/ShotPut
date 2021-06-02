@@ -1,4 +1,4 @@
-package org.bralax.parser;
+package io.github.bralax.shotput.parser;
 
 import java.util.List;
 

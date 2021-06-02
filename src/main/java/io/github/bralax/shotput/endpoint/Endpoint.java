@@ -1,4 +1,4 @@
-package org.bralax.endpoint;
+package io.github.bralax.shotput.endpoint;
 
 import java.util.List;
 import java.util.Map;

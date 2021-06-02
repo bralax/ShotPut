@@ -1,4 +1,4 @@
-package org.bralax.html;
+package io.github.bralax.shotput.html;
 
 public class PastelUtil {
     public String getCSSLinkTag(String name, String media) {

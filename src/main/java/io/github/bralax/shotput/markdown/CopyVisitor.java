@@ -1,4 +1,4 @@
-package org.bralax.markdown;
+package io.github.bralax.shotput.markdown;
 
 import org.commonmark.node.AbstractVisitor;
 import org.commonmark.node.*;

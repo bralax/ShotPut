@@ -1,4 +1,4 @@
-package org.bralax.parser;
+package io.github.bralax.shotput.parser;
 
 //import java.util.Arrays;
 import java.util.List;
@@ -10,9 +10,9 @@ import java.util.regex.Pattern;
 
 import com.github.javaparser.javadoc.JavadocBlockTag;
 
-import org.bralax.endpoint.Endpoint;
-import org.bralax.endpoint.Parameter;
-import org.bralax.endpoint.Response;
+import io.github.bralax.shotput.endpoint.Endpoint;
+import io.github.bralax.shotput.endpoint.Parameter;
+import io.github.bralax.shotput.endpoint.Response;
 
 
 public class JavadocParser {

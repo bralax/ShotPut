@@ -1,4 +1,4 @@
-package org.bralax.parser;
+package io.github.bralax.shotput.parser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +31,7 @@ import com.github.javaparser.javadoc.description.JavadocDescriptionElement;
 import com.github.javaparser.javadoc.description.JavadocSnippet;
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
 
-import org.bralax.endpoint.Endpoint;
+import io.github.bralax.shotput.endpoint.Endpoint;
 
 public class CodeParser extends TreeVisitor {
 

@@ -3,7 +3,7 @@
              xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
         <modelVersion>4.0.0</modelVersion>
 
-        <groupId>org.bralax</groupId>
+        <groupId>io.github.bralax</groupId>
         <artifactId>shotput</artifactId>
         <version>0.1</version>
         <packaging>jar</packaging>
@@ -103,7 +103,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>org.bralax.CLI</mainClass>
+                            <mainClass>io.github.bralax.shotput.CLI</mainClass>
                         </manifest>
                     </archive>
                     </configuration>
@@ -114,7 +114,7 @@
                     <configuration>
                         <archive>
                         <manifest>
-                            <mainClass>org.bralax.CLI</mainClass>
+                            <mainClass>io.github.bralax.shotput.CLI</mainClass>
                         </manifest>
                         </archive>
                         <descriptorRefs>

@@ -1,4 +1,4 @@
-package org.bralax;
+package io.github.bralax.shotput;
 
 import java.io.File;
 

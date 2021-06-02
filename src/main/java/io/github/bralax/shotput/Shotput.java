@@ -1,4 +1,4 @@
-package org.bralax;
+package io.github.bralax.shotput;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -8,13 +8,13 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
-import org.bralax.code.JavaGenerator;
-import org.bralax.code.SampleCodeGenerator;
-import org.bralax.endpoint.Endpoint;
-import org.bralax.endpoint.Parameter;
-import org.bralax.markdown.Scribe;
-import org.bralax.openapi.OpenApiGenerator;
-import org.bralax.parser.CodeParser;
+import io.github.bralax.shotput.code.JavaGenerator;
+import io.github.bralax.shotput.code.SampleCodeGenerator;
+import io.github.bralax.shotput.endpoint.Endpoint;
+import io.github.bralax.shotput.endpoint.Parameter;
+import io.github.bralax.shotput.markdown.Scribe;
+import io.github.bralax.shotput.openapi.OpenApiGenerator;
+import io.github.bralax.shotput.parser.CodeParser;
 
 import io.swagger.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;

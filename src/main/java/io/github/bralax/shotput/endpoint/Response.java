@@ -1,4 +1,4 @@
-package org.bralax.endpoint;
+package io.github.bralax.shotput.endpoint;
 
 public class Response {
     

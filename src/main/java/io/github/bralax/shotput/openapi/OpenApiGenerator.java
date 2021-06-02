@@ -1,13 +1,13 @@
-package org.bralax.openapi;
+package io.github.bralax.shotput.openapi;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bralax.Config;
-import org.bralax.endpoint.Endpoint;
-import org.bralax.endpoint.Parameter;
+import io.github.bralax.shotput.Config;
+import io.github.bralax.shotput.endpoint.Endpoint;
+import io.github.bralax.shotput.endpoint.Parameter;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;

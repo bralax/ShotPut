@@ -18,30 +18,41 @@ To run the program without creating a .jar file, run:
 The following ASCII file structure diagram shows the basic structure of the repository highlighting important files:
 
 ```
-org.bralax
-├── test/                       // A place containing old code used for testing the system
-│   └── Example.java            // An example file to test on
-├── html/                       // Everything related to storing and generating html
-│   ├── StringContent.java      // Representing a piece of text in the html
-│   ├── HtmlAttr.java           // Available attributes that you can assign to an html element
-│   ├── HtmlStyle.java          // A file containing an enum of availble class names. **Needs to be cleaned up**
-│   ├── TagName.java            // A file containing an enum of tag types from html.
-│   └── HtmlTree.java           // A class representing a section of the html document.
-├── Endpoint.java               // A small class representing an individual parsed endpoint. Any additional stored information will go here.
-├── HTMLGenerator.java          // The code that generates an HTML document from the given endpoints
-└── JavalinDoc.java             // The main file of the system currently responsible for command-line, parsing the files and generating the .csv
+io.github.bralax.shotput
+├── CLI.java                      // All code relating to using the system from the command line
+├── Config.java                   // An object representing the configuration settings
+├── ConfigParser.java             // A class for parsing a config .yml file into a config object
+├── Shotput.java                  // The core class for the whole system
+├── code                          // All code relating to generating sample code to use a endpoint
+│   ├── BashGenerator.java        // System to generate Bash curl requests, could use more work
+│   ├── JavaGenerator.java        // System to generate Java unires requests
+│   └── SampleCodeGenerator.java  // Base class for code generation. Provides helper methods for generating urls and parameters
+├── endpoint                      // Folder containg object representing the intepretted endpoints
+│   ├── BodyParameter.java        // A layered version of a parameter allowing them to be namespaced to handle objects/arrays
+│   ├── Endpoint.java             // A small class representing an individual parsed endpoint.
+│   ├── Parameter.java            // A class representing an individual parameter parsed from the code
+│   └── Response.java             // A class representing an individual response parsed from the code
+├── html                          // All code responsible for takking the markdown code and converting it to html
+│   ├── Pastel.java               // Main code to convert the markdown to html
+│   └── PastelUtil.java           // Helper methods used by the html velocity templates
+├── markdown                      // All code related to parsing and creating markdown code
+│   ├── CopyVisitor.java          // Code used by Pastel.java to parse the markdown file
+│   ├── MarkdownWriterUtils.java  // Helper methods used by the markdown velocity templates
+│   └── Scribe.java               // The main code for converting the endpoints into markdown
+├── openapi                       // All code related to generating openapi specs
+│   └── OpenApiGenerator.java     // The code for generating the spec. Needs more work
+└── parser                        // Folder that contains all code parsing
+    ├── CodeParser.java           // Main class that parses all the code
+    ├── JavadocParser.java        // Methods used to interpret and parse a javadoc comment
+    ├── MethodParser.java         // Methods used to parse the body of a method
+    └── ParserHelpers.java        // Extra helper methods used throughout the code parses.
 ```
 
 # Future Plans
 Here are some of the major goals I have for the project:
-* A complete css file that can be used
 * The ability to work with the major javalin plugins including:
   * Javalin-graphql
   * Javalin-openapi
   * Javalin-vue
 * Better support for sse and websockets. Right now they get the same options as a regular get/post endpoint which probably does not make the most sense.
-* The ability to define an endpoint in any javadoc comment
 * The ability to parse a handler when the handler is not a lambda function
-* A place to put general information about the endpoints below without conflicting with general javadocs
-* Logging system 
-* Refactor the system to seperate out some of the work from JavalinDoc.java and offer more instantiable classes so that features of the system can be used elsewhere such as the parser or the html generation system.

@@ -1,8 +1,8 @@
-package org.bralax.code;
+package io.github.bralax.shotput.code;
 
 
-import org.bralax.endpoint.Endpoint;
-import org.bralax.endpoint.Parameter;
+import io.github.bralax.shotput.endpoint.Endpoint;
+import io.github.bralax.shotput.endpoint.Parameter;
 
 public class JavaGenerator extends SampleCodeGenerator {
 

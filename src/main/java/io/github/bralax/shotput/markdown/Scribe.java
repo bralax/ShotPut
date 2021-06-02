@@ -1,4 +1,4 @@
-package org.bralax.markdown;
+package io.github.bralax.shotput.markdown;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -17,10 +17,10 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
-import org.bralax.Config;
-import org.bralax.code.SampleCodeGenerator;
-import org.bralax.endpoint.Endpoint;
-import org.bralax.html.Pastel;
+import io.github.bralax.shotput.Config;
+import io.github.bralax.shotput.code.SampleCodeGenerator;
+import io.github.bralax.shotput.endpoint.Endpoint;
+import io.github.bralax.shotput.html.Pastel;
 
 public class Scribe {
     private Pastel pastel;

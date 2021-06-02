@@ -1,4 +1,4 @@
-package org.bralax.parser;
+package io.github.bralax.shotput.parser;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,9 +18,9 @@ import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 
-import org.bralax.endpoint.Endpoint;
-import org.bralax.endpoint.Parameter;
-import org.bralax.endpoint.Response;
+import io.github.bralax.shotput.endpoint.Endpoint;
+import io.github.bralax.shotput.endpoint.Parameter;
+import io.github.bralax.shotput.endpoint.Response;
 
 public class MethodParser {
     public static void parseMethodStatements(NodeList<Statement> stmts, Endpoint endpoint, List<JavadocBlockTag> tags, String ctx) {

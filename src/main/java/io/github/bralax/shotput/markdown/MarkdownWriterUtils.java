@@ -1,9 +1,9 @@
-package org.bralax.markdown;
+package io.github.bralax.shotput.markdown;
 
 import java.util.Map;
 
-import org.bralax.code.SampleCodeGenerator;
-import org.bralax.endpoint.Endpoint;
+import io.github.bralax.shotput.code.SampleCodeGenerator;
+import io.github.bralax.shotput.endpoint.Endpoint;
 
 import static java.util.Map.entry;
 
