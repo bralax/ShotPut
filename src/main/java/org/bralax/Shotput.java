@@ -16,7 +16,6 @@ import org.bralax.markdown.Scribe;
 import org.bralax.openapi.OpenApiGenerator;
 import org.bralax.parser.CodeParser;
 
-import io.javalin.Javalin;
 import io.swagger.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 
@@ -65,10 +64,12 @@ public class Shotput {
         CombinedTypeSolver solver = new CombinedTypeSolver();
         solver.add(new ReflectionTypeSolver());
         solver.add(new JarTypeSolver(getClass().getClassLoader().getResource("javalin-3.9.1.jar").openStream()));
-        solver.add(new JavaParserTypeSolver(this.file));
+        //solver.add(new JavaParserTypeSolver(this.file));
+        this.addFolderSymbolSolvers(solver, this.file);
         JavaSymbolSolver symbolSolver = new JavaSymbolSolver(solver);
         StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
         this.parse(this.file);
+        //System.out.println(this.endpoints.size());
         if (this.excel) {
             this.generateExcel();
         }
@@ -80,7 +81,26 @@ public class Shotput {
         }
     }
 
+    private void addFolderSymbolSolvers(CombinedTypeSolver solver, File file) {
+        if (file != null) {
+            if (file.isDirectory()) {
+                boolean isEmpty = true;
+                for (File f: file.listFiles()) {
+                    if (f.isDirectory()) {
+                        System.out.println(f.getAbsolutePath());
+                        solver.add(new JavaParserTypeSolver(f));
+                        isEmpty = false;
+                    }
+                }
+                if (isEmpty) {
+                    solver.add(new JavaParserTypeSolver(file));
+                }
+            }
+        }
+    }
+
     private void parse(File f) throws IOException{
+       // System.out.println(f.getAbsolutePath());
         if (f.isDirectory()) {
             for (File file : f.listFiles()) {
                 this.parse(file);
@@ -149,12 +169,12 @@ public class Shotput {
                         printWriter.print(",,");
                     }
 
-                    if (j < endpoint.responseStatusLength()) {
+                    /*if (j < endpoint.responseStatusLength()) {
                         Parameter param = endpoint.responseStatus(j);
                         printWriter.print(prepForCSV(param.getName()) + "," + prepForCSV(param.getDescription()) + ",");
                     } else {
                         printWriter.print(",,");
-                    }
+                    }*/
                     printWriter.println("");
                 }
             } else {

@@ -3,6 +3,7 @@ package org.bralax.endpoint;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -15,8 +16,9 @@ public class Endpoint {
    private Map<String, BodyParameter> bodyParams;
    private List<Parameter> headerParams;
    private List<Parameter> responseHeaders;
-   private List<Parameter> responseStatuses;
-   private List<Parameter> exampleResponse;
+   //private List<Parameter> responseStatuses;
+   private List<Parameter> responseFields;
+   private List<Response> exampleResponses;
    private String responseType;
    private String responseDescription;
    private boolean authenticated;
@@ -36,9 +38,10 @@ public class Endpoint {
       this.formParams = new ArrayList<>();
       this.bodyParams = new HashMap<>();
       this.headerParams = new ArrayList<>();
-      this.responseStatuses = new ArrayList<>();
+      this.responseFields = new ArrayList<>();
+      //this.responseStatuses = new ArrayList<>();
       this.responseHeaders = new ArrayList<>();
-      this.exampleResponse = new ArrayList<>();
+      this.exampleResponses = new ArrayList<>();
       this.group = "Endpoint";
       this.authenticated = false;
    }
@@ -53,7 +56,8 @@ public class Endpoint {
       this.queryParams = new ArrayList<>();
       this.formParams = new ArrayList<>();
       this.headerParams = new ArrayList<>();
-      this.responseStatuses = new ArrayList<>();
+      this.responseFields = new ArrayList<>();
+      //this.responseStatuses = new ArrayList<>();
       this.responseHeaders = new ArrayList<>();
       this.authenticated = false;
       this.group = "Endpoint";
@@ -91,16 +95,19 @@ public class Endpoint {
       this.headerParams.add(param);
    }
 
-   public void addResponseStatus(Parameter param) {
-      this.responseStatuses.add(param);
+   public void addResponseField(Parameter param) {
+      this.responseFields.add(param);
    }
+   /*public void addResponseStatus(Parameter param) {
+      this.responseStatuses.add(param);
+   }*/
 
    public void addResponseHeader(Parameter param) {
       this.responseHeaders.add(param);
    }
 
-   public void addExampleResponse(Parameter param) {
-      this.exampleResponse.add(param);
+   public void addExampleResponse(Response param) {
+      this.exampleResponses.add(param);
    }
 
 
@@ -121,8 +128,16 @@ public class Endpoint {
    }
 
    public int responseStatusLength() {
-      return this.responseStatuses.size();
+      return this.responseFields.size();
    }
+
+   public int exampleResponseLength() {
+      return this.exampleResponses.size();
+   }
+
+   /*public int responseStatusLength() {
+      return this.responseStatuses.size();
+   }*/
 
    public int responseHeaderLength() {
       return this.responseHeaders.size();
@@ -145,12 +160,20 @@ public class Endpoint {
       return this.headerParams.get(i);
    }
 
-   public Parameter responseStatus(int i) {
+   /*public Parameter responseStatus(int i) {
       return this.responseStatuses.get(i);
-   }
+   }*/
 
    public Parameter responseHeader(int i) {
       return this.responseHeaders.get(i);
+   }
+
+   public Parameter responseField(int i) {
+      return this.responseFields.get(i);
+   }
+
+   public Response exapleResponse(int i) {
+      return this.exampleResponses.get(i);
    }
 
    public Parameter[] pathParams() {
@@ -169,9 +192,16 @@ public class Endpoint {
       return this.headerParams.toArray(new Parameter[this.formParamLength()]);
    }
 
-   public Parameter[] responseStatus() {
-      return this.responseStatuses.toArray(new Parameter[this.responseStatuses.size()]);
+   public Parameter[] responseFields() {
+      return this.responseFields.toArray(new Parameter[this.responseFields.size()]);
    }
+
+   public Response[] exampleResponses() {
+      return this.exampleResponses.toArray(new Response[this.exampleResponses.size()]);
+   }
+   /*public Parameter[] responseStatus() {
+      return this.responseStatuses.toArray(new Parameter[this.responseStatuses.size()]);
+   }*/
 
    public Parameter[] responseHeaders() {
       return this.responseHeaders.toArray(new Parameter[this.responseHeaders.size()]);
@@ -268,8 +298,11 @@ public class Endpoint {
       "Form Parameters" + this.formParams + "\n" + 
       "Body Parameters" + this.bodyParams+ "\n" + 
       "Request Headers" + this.headerParams + "\n" + 
-      "Response Headers" + this.responseHeaders + "\n" + 
-      "Response Status Codes: " + this.responseStatuses + "}";
+      "Response Headers" + this.responseHeaders + "\n" +
+      "Response Fields: " + this.responseFields + "\n" + 
+      "Example Responses: " + this.exampleResponses //+ 
+      //"Response Status Codes: " + this.responseStatuses 
+      + "}";
    }
 
    public boolean equals(Object a) {

@@ -29,6 +29,7 @@ import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.description.JavadocDescription;
 import com.github.javaparser.javadoc.description.JavadocDescriptionElement;
 import com.github.javaparser.javadoc.description.JavadocSnippet;
+import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
 
 import org.bralax.endpoint.Endpoint;
 
@@ -123,7 +124,6 @@ public class CodeParser extends TreeVisitor {
                         }
                         parseMethodDeclaration(decl, endpoint, tags);
                         JavadocParser.parseJavadocTags(endpoint, tags);
-                        System.out.println(endpoint);
                         if (this.endpoints.contains(endpoint)) {
                             this.endpoints.remove(endpoint);
                         }
@@ -150,7 +150,7 @@ public class CodeParser extends TreeVisitor {
         }
         if (call.getArgument(1) instanceof LambdaExpr) {
             parseLambdaExpression((LambdaExpr)call.getArgument(1), endpoint, tags);
-        } else if (call.getArgument(1) instanceof MethodReferenceExpr){
+        } else if (call.getArgument(1) instanceof MethodReferenceExpr && call.getArguments().size() <= 2){
             parseMethodReference(call.getArgument(1).asMethodReferenceExpr(), endpoint, tags);
         }
         JavadocParser.parseJavadocTags(endpoint, tags);

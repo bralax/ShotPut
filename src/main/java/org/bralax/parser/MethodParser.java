@@ -20,6 +20,7 @@ import com.github.javaparser.javadoc.JavadocBlockTag;
 
 import org.bralax.endpoint.Endpoint;
 import org.bralax.endpoint.Parameter;
+import org.bralax.endpoint.Response;
 
 public class MethodParser {
     public static void parseMethodStatements(NodeList<Statement> stmts, Endpoint endpoint, List<JavadocBlockTag> tags, String ctx) {
@@ -134,7 +135,8 @@ public class MethodParser {
                             if (tag != null) {
                                 JavadocParser.parseParameterJavadoc(endpoint, tag);
                             } else {
-                                endpoint.addResponseStatus(new Parameter(call.getArgument(0).toString(), ""));
+                                int status = call.getArgument(0).asIntegerLiteralExpr().asNumber().intValue();
+                                endpoint.addExampleResponse(new Response(status, "", ""));
                             }
                         }
                         break;

@@ -11,6 +11,13 @@ public abstract class SampleCodeGenerator {
     public abstract String generate(String baseUrl, Endpoint endpoint);
 
     protected String generateDefaultValue(Parameter param) {
+        String example = param.getExample();
+        if (example != null) {
+            return example;
+        }
+        if (param.getType() == null) {
+            return generateRandomString();
+        }
         switch(param.getType()) {
             case "Int":
                 return "" + ((int)Math.random() * 10000);
@@ -48,9 +55,23 @@ public abstract class SampleCodeGenerator {
         for (int i = 0; i < pathParts.length; i++) {
             String part = pathParts[i];
             if (part.startsWith(":")) {
-                part = part.substring(1);  
-            } 
-            builder.append(part);
+                part = part.substring(1);
+                Parameter finalParam = null;
+                for (Parameter param : endpoint.pathParams()) {
+                    if (part.equals(param.getName())) {
+                        finalParam = param;
+                        break;
+                    }
+                } 
+                if (finalParam != null) {
+                    System.out.println(finalParam);
+                    builder.append(generateDefaultValue(finalParam));
+                }  else {
+                    builder.append(part);
+                }
+            } else {
+                builder.append(part);
+            }
             if (i < pathParts.length - 1) {
                 builder.append("/");
             }

@@ -4,6 +4,7 @@ public class Parameter {
    private String name;
    private String description;
    private String type;
+   private String example;
    private boolean required;
    
    public Parameter(String name, String description) {
@@ -27,6 +28,10 @@ public class Parameter {
    public String getType() {
       return type;
    }
+
+   public String getExample() {
+      return example;
+   }
    
    public boolean getRequired() {
       return required;
@@ -47,10 +52,14 @@ public class Parameter {
    public void setRequired(boolean req) {
       this.required = req;
    }
+
+   public void setExample(String example) {
+      this.example = example;
+   }
    
    @Override
    public String toString() {
-      return "{Name: "+this.name+", Type: "+this.type+", Required: "+this.required+", Description: "+this.description+"}";
+      return "{Name: "+this.name+", Type: "+this.type+", Required: "+this.required+", Description: "+this.description+", Example: "+ this.example +"}";
    }
 
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
+import com.github.javaparser.resolution.types.ResolvedType;
 
 public class ParserHelpers {
     public static JavadocBlockTag getCommentTag(List<JavadocBlockTag> tags, String type) {
@@ -38,7 +39,8 @@ public class ParserHelpers {
 
     public static String getSymbol(NameExpr expr) {
         try {
-            return expr.calculateResolvedType().describe();
+            ResolvedType type = expr.calculateResolvedType();
+            return type.describe();
         } catch (UnsolvedSymbolException exception) {
             return exception.toString();
         } catch (RuntimeException exception) {
