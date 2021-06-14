@@ -9,10 +9,13 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
+/**
+ * Class containing the command line interface for ShotPut.
+ * @author Brandon Lax
+ */
 public class CLI {
     public static void main(String[] args) throws Exception {
         Options options = new Options();
-        //options.addOption(Option.builder("s").longOpt("css").desc("The css file to be used on the html").hasArg().required(false).build());
         options.addOption(Option.builder("cp").longOpt("classpath").desc("The files to parse (Required)").hasArg().required(true).build());
         options.addOption(Option.builder("c").longOpt("config").desc("A Configuration file path").hasArg().required(false).build());
         options.addOption(Option.builder("o").longOpt("outdir").desc("The place to put the generated files (Required)").hasArg().required(true).build());

@@ -3,6 +3,9 @@ package io.github.bralax.shotput.endpoint;
 import java.util.HashMap;
 import java.util.Map;
 
+/** Class representing an grouped.
+ * @author Brandon Lax
+ */
 public class BodyParameter {
     private Parameter param;
     private Map<String, BodyParameter> children;

@@ -12,6 +12,7 @@ import io.github.bralax.shotput.code.JavaGenerator;
 import io.github.bralax.shotput.code.SampleCodeGenerator;
 import io.github.bralax.shotput.endpoint.Endpoint;
 import io.github.bralax.shotput.endpoint.Parameter;
+import io.github.bralax.shotput.excel.ExcelGenerator;
 import io.github.bralax.shotput.markdown.Scribe;
 import io.github.bralax.shotput.openapi.OpenApiGenerator;
 import io.github.bralax.shotput.parser.CodeParser;
@@ -27,17 +28,45 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+/** Central class responsible for the actual documentation generation.
+ * @author Brandon Lax
+ */
 public class Shotput {
+    /** The list of interpretted endpoints. */
     private List<Endpoint> endpoints;
+
+    /** The source directory/file of the code to interpret. */
     private File file;
+
+    /** Boolean of whether to generate an excel file. */
     private boolean excel;
+
+    /** Boolean of whether to generate html documentation. */
     private boolean html;
+
+    /** The  directory to put the generated files into. */
     private File out;
+
+    /** Code generators to use for generating sample code. */
     private List<SampleCodeGenerator> generators;
+
+    /** The interpretted config to used when generating documentation. */
     private Config config;
+
+    /** Boolean of whether to generate a swagger/open-api spec. */
     private boolean swagger;
 
+    /**
+     * Constructor of shotput.
+     * 
+     * All fields are required.
+     * @param config The config to base the docs on.
+     * @param src The soure directory or file
+     * @param excel Whether to generate an excel file
+     * @param html Whether to generate html docs
+     * @param swagger Whether to generate swagger/open-api docus
+     * @param out The path to the output directory
+     */
     public Shotput(Config config, File src, boolean excel, boolean html, boolean swagger, File out) {
         this.endpoints = new ArrayList<>();
         this.generators = new ArrayList<>();
@@ -55,23 +84,31 @@ public class Shotput {
         }
     }
 
+    /**
+     * Adds a new code generator to the system.
+     * Can be chained.
+     * @param generator The sample code generator to add.
+     * @return this
+     */
     public Shotput registerGenerator(SampleCodeGenerator generator) {
         this.generators.add(generator);
         return this;
     }
 
+    /**
+     * Method that triggers the action documentation generation.
+     * @throws IOException If src or out can not be found
+     */
     public void start() throws IOException {
         CombinedTypeSolver solver = new CombinedTypeSolver();
         solver.add(new ReflectionTypeSolver());
         solver.add(new JarTypeSolver(getClass().getClassLoader().getResource("javalin-3.9.1.jar").openStream()));
-        //solver.add(new JavaParserTypeSolver(this.file));
         this.addFolderSymbolSolvers(solver, this.file);
         JavaSymbolSolver symbolSolver = new JavaSymbolSolver(solver);
         StaticJavaParser.getConfiguration().setSymbolResolver(symbolSolver);
         this.parse(this.file);
-        //System.out.println(this.endpoints.size());
         if (this.excel) {
-            this.generateExcel();
+            ExcelGenerator.generateExcel(this.endpoints, this.out);
         }
         if (this.html) {
             this.generateHTML();
@@ -81,6 +118,11 @@ public class Shotput {
         }
     }
 
+    /** Small helper used to register all base paths in the symbol solver.
+     * 
+     * @param solver The symbol solver to add the file to
+     * @param file The base file/src dir
+     */
     private void addFolderSymbolSolvers(CombinedTypeSolver solver, File file) {
         if (file != null) {
             if (file.isDirectory()) {
@@ -99,6 +141,11 @@ public class Shotput {
         }
     }
 
+    /**
+     * The method that triggers a parse of a source file.
+     * @param f The file or directory to parse (performed recursively)
+     * @throws IOException If a file can not be found
+     */
     private void parse(File f) throws IOException{
        // System.out.println(f.getAbsolutePath());
         if (f.isDirectory()) {
@@ -115,101 +162,18 @@ public class Shotput {
         }
     }
 
-    
-
-    private void generateExcel() {
-        //System.out.println(this.out.getAbsolutePath());
-        try {
-        PrintWriter printWriter = new PrintWriter(this.out.getAbsolutePath() + "/endpoints.csv");
-        printWriter.print("Index,Type,Endpoint,Response Type,Description,Path Parameter, Path Parameter Description, Query Parameter, Query Parameter Description,");
-        printWriter.print("Form Parameter, Form Parameter Description, Request Header, Request Header Description, Response Header, Response Header Description,");
-        printWriter.println("Response Status,Response Status Description");
-        for (int i = 0; i < this.endpoints.size(); i++) {
-            Endpoint endpoint = endpoints.get(i);
-            int max = maxLength(endpoint.pathParamLength(), endpoint.formParamLength(), endpoint.headerParamLength(), endpoint.queryParamLength(), endpoint.responseHeaderLength(), endpoint.responseStatusLength());
-            if (max > 0) {
-                for (int j = 0; j < max; j++) {
-                    if (j == 0) {
-                        printWriter.print((i + 1) + "," + prepForCSV(endpoint.getType()) + "," + prepForCSV(endpoint.getEndpoint()) + "," +  prepForCSV(endpoint.getResponseType()) + "," + prepForCSV(endpoint.getDescription()) + ",");
-                    } else {
-                        printWriter.print(",,,,,");
-                    }
-                    if (j < endpoint.pathParamLength()) {
-                        Parameter param = endpoint.pathParam(j);
-                        printWriter.print(prepForCSV(param.getName()) + "," + prepForCSV(param.getDescription()) + ",");
-                    } else {
-                        printWriter.print(",,");
-                    }
-
-                    if (j < endpoint.queryParamLength()) {
-                        Parameter param = endpoint.queryParam(j);
-                        printWriter.print(prepForCSV(param.getName()) + "," + prepForCSV(param.getDescription()) + ",");
-                    } else {
-                        printWriter.print(",,");
-                    }
-
-                    if (j < endpoint.formParamLength()) {
-                        Parameter param = endpoint.formParam(j);
-                        printWriter.print(prepForCSV(param.getName()) + "," + prepForCSV(param.getDescription()) + ",");
-                    } else {
-                        printWriter.print(",,");
-                    }
-
-                    if (j < endpoint.headerParamLength()) {
-                        Parameter param = endpoint.headerParam(j);
-                        printWriter.print(prepForCSV(param.getName()) + "," + prepForCSV(param.getDescription()) + ",");
-                    } else {
-                        printWriter.print(",,");
-                    }
-
-                    if (j < endpoint.responseHeaderLength()) {
-                        Parameter param = endpoint.responseHeader(j);
-                        printWriter.print(prepForCSV(param.getName()) + "," + prepForCSV(param.getDescription()) + ",");
-                    } else {
-                        printWriter.print(",,");
-                    }
-
-                    /*if (j < endpoint.responseStatusLength()) {
-                        Parameter param = endpoint.responseStatus(j);
-                        printWriter.print(prepForCSV(param.getName()) + "," + prepForCSV(param.getDescription()) + ",");
-                    } else {
-                        printWriter.print(",,");
-                    }*/
-                    printWriter.println("");
-                }
-            } else {
-                printWriter.println((i + 1) + "," + prepForCSV(endpoint.getType()) + "," + prepForCSV(endpoint.getEndpoint()) + "," +  prepForCSV(endpoint.getResponseType()) + "," + prepForCSV(endpoint.getDescription()) + ",");
-            }
-        }
-        printWriter.flush();
-        printWriter.close();
-        } catch (IOException exception) {
-            System.err.println("Failed to generate CSV!");
-        }
-    }
-
-    private int maxLength(int... vals) {
-        int max = 0; // the minimum possible length is 0
-        for (int val: vals) {
-            if (val > max) {
-                max = val;
-            }
-        }
-        return max;
-    }
-
-    private String prepForCSV(String original) {
-        original = original.strip();
-        original = original.replace("\n", " ");
-        original = original.replace(",", " ");
-        return original;
-    }
-
+    /**
+     * Small helper responsible for triggering the generation of html docs.
+     * @throws IOException If the out directory does not exist
+     */
     private void generateHTML() throws IOException{
         new Scribe(out.getAbsolutePath(), this.config, this.generators).writeDocs(this.groupEndpoints(endpoints));
     }
 
 
+    /**
+     * Small helper for generating open api specs.
+     */
     private void generateOpenApi() {
        OpenAPI api = new OpenApiGenerator(config).generate(endpoints);
        try {
@@ -222,6 +186,11 @@ public class Shotput {
        }
     }
 
+    /**
+     * Small helper used to group endpoints by their group property.
+     * @param endpoints The list of all endpoints
+     * @return The list of endpoints grouped by the result of .getGroup()
+     */
     private Map<String, List<Endpoint>> groupEndpoints(List<Endpoint> endpoints) {
         Map<String, List<Endpoint>> grouped = new HashMap<>();
         for (Endpoint endpoint: endpoints) {

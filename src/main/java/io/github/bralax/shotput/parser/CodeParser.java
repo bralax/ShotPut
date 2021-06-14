@@ -33,16 +33,37 @@ import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
 
 import io.github.bralax.shotput.endpoint.Endpoint;
 
+/** Class resposible for performing the search through the code for endpoints.
+ * @author Brandon Lax
+ */
 public class CodeParser extends TreeVisitor {
 
+    /** The list of endpoints generated. */
     private Set<Endpoint> endpoints;
+
     public CodeParser() {
         this.endpoints = new HashSet<>();
     }
 
+    /**
+     * Gets the list of all endpoints. 
+     * 
+     * Will return an empty list until after process is called.
+     * @return The list of endpoints interpretted from the code
+     */
     public List<Endpoint> getEndpoints() {
         return Arrays.asList(this.endpoints.toArray(new Endpoint[this.endpoints.size()]));
     }
+
+
+    /**
+     * Method that is responsible for parsing an individual node of the ast.
+     * This method can recognize the two patterns the system currently looks for:
+     * * Endpoint registration
+     * * Method with only Context parameter
+     * It then triggers proper functions to continue the parsing.
+     * @param node The node to interpret
+     */
     @Override
     public void process(Node node) {
         if (node instanceof ExpressionStmt) {
@@ -134,7 +155,12 @@ public class CodeParser extends TreeVisitor {
         }
     } 
 
-
+    /**
+     * Helper method for parsing an endpoint once found
+     * @param endpoint The endpoint that should be added to
+     * @param tags A list of javadoc tags attached to this method
+     * @param call The node that is being interpreted.
+     */
     private void parseEndpoint(Endpoint endpoint, List<JavadocBlockTag> tags, MethodCallExpr call) {
         endpoint.setType(Endpoint.Type.valueOf(call.getNameAsString().toUpperCase()));
         ParserHelpers.getCommentTag(tags, "type");
@@ -156,12 +182,26 @@ public class CodeParser extends TreeVisitor {
         JavadocParser.parseJavadocTags(endpoint, tags);
     }
 
+    /**
+     * Unused. 
+     * 
+     * Designed to try to link a registration to the method but currently works infrequently.
+     * @param expr The method reference to find the source of
+     * @param endpoint The endpoint to add info to
+     * @param tags The list of javadoc tags attached to the endpoint
+     */
     private void parseMethodReference(MethodReferenceExpr expr, Endpoint endpoint, List<JavadocBlockTag> tags ) {
         /*System.out.println(expr.asMethodReferenceExpr().resolve());
         ResolvedMethodDeclaration type = expr.resolve();
         System.out.println(type);*/
     }
 
+    /**
+     * Helper method used to parse the contents of the endpoint method when it is a lambda expresssion.
+     * @param expr The lambda expression to interpret
+     * @param endpoint The endpoint to add info to
+     * @param tags The list of javadoc tags attached to the endpoint
+     */
     private void parseLambdaExpression(LambdaExpr expr, Endpoint endpoint, List<JavadocBlockTag> tags) {
         String ctx = expr.getParameter(0).getNameAsString();
         Statement e = expr.getBody();
@@ -172,6 +212,12 @@ public class CodeParser extends TreeVisitor {
 
     }
 
+    /**
+     * Helper method used to parse the contents of the endpoint method when it is a a method.
+     * @param expr The method declaration to interpret
+     * @param endpoint The endpoint to add info to
+     * @param tags The list of javadoc tags attached to the endpoint
+     */
     private void parseMethodDeclaration(MethodDeclaration expr, Endpoint endpoint, List<JavadocBlockTag> tags) {
         String ctx = expr.getParameter(0).getNameAsString();
         Optional<BlockStmt> e = expr.getBody();
@@ -181,12 +227,13 @@ public class CodeParser extends TreeVisitor {
         }
     }
 
-    
-
-   
-
-    
-
+    /**
+     * Small helper used to parse a javadoc comment.
+     * 
+     * Used as the tool provided with the library was providing bad intepretations.
+     * @param comment The javadoc comment node to interpret
+     * @return A properly parsed javadoc comment.
+     */
     private Javadoc parseJavadoc(JavadocComment comment) {
         String comm = comment.toString();
         comm = comm.replace("/**", "");
@@ -241,6 +288,12 @@ public class CodeParser extends TreeVisitor {
         return doc;
     }
 
+    /**
+     * Small helper to confirm that a method name is one we can intepret.
+     * This only relates to comments on endpoint registations
+     * @param name The name of the method
+     * @return Whether the method is one the system can interpret
+     */
     static boolean isValidMethod(String name) {
         String[] vals = {"delete","get","head","options","patch", "post","put", "sse", "ws"};
         return Arrays.binarySearch(vals, name) >= 0;

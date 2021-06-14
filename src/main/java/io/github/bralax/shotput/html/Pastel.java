@@ -43,7 +43,10 @@ import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
  
-
+/** Class responsible for interpretting the markdown to html.
+ * Based on https://github.com/knuckleswft/pastel
+ * @author Brandon Lax
+ */
 public class Pastel {
     public static Map<String, Object> defaultMetadata = Map.ofEntries(
         entry("title", "API Documentation"),

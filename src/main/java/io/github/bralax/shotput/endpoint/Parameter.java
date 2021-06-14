@@ -1,10 +1,22 @@
 package io.github.bralax.shotput.endpoint;
 
+/**
+ * Class representing a parameter on an endpoint.
+ */
 public class Parameter {
+   /** The parameter name. */
    private String name;
+
+   /** The paramter description. */
    private String description;
+
+   /** The parameter type. */
    private String type;
+
+   /** An example value for the parameter */
    private String example;
+
+   /** Whether the parameter is mandatory */
    private boolean required;
    
    public Parameter(String name, String description) {

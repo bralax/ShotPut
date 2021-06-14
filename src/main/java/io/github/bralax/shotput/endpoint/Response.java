@@ -1,5 +1,8 @@
 package io.github.bralax.shotput.endpoint;
 
+/** Class representing an example response.
+ * @author Brandon Lax
+ */
 public class Response {
     
     private int statusCode;

@@ -7,24 +7,56 @@ import java.util.Objects;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Endpoint { 
+/** Class representing an endpoint.
+ * @author Brandon Lax
+ */
+public class Endpoint {
+   /** The endpoint type */ 
    private Type type;
+
+   /** The endpoint path. */
    private String endpoint;
+
+   /** A list of all path paramters. */
    private List<Parameter> pathParams;
+
+   /** A list of all query paramters. */
    private List<Parameter> queryParams;
+   
+   /** A list of all form paramters. */
    private List<Parameter> formParams;
+
+   /** A Map of all body paramters. (the form paramters grouped) */
    private Map<String, BodyParameter> bodyParams;
+   
+   /** A list of all header paramters. */
    private List<Parameter> headerParams;
+
+   /** A list of all response headers. */
    private List<Parameter> responseHeaders;
-   //private List<Parameter> responseStatuses;
+   
+   /** A list of all response fields. */
    private List<Parameter> responseFields;
+   
+   /** A list of all example responses. */
    private List<Response> exampleResponses;
+   
+   /** The mime type of the response. */
    private String responseType;
+   
+   /** A description of the response. */
    private String responseDescription;
+   
+   /** Whether you must be authenticated to access this endpoint. */
    private boolean authenticated;
+
+   /** The group this endpoint is in. */
    private String group;
 
+   /** A title of the endpoint. */
    private String title;
+
+   /** A description of the endpoint. */
    private String description;
    
    public Endpoint() {

@@ -9,6 +9,9 @@ import static java.util.Map.entry;
 
 import java.util.List;
 
+/** Class containing methods used by velocity for generating the markdown.
+ * @author Brandon Lax
+ */
 public class MarkdownWriterUtils {
     private List<SampleCodeGenerator> gens;
     private String baseUrl;

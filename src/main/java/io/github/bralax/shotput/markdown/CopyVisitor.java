@@ -3,6 +3,9 @@ package io.github.bralax.shotput.markdown;
 import org.commonmark.node.AbstractVisitor;
 import org.commonmark.node.*;
 
+/** Class responsible for merging markdown files.
+ * @author Brandon Lax
+ */
 public class CopyVisitor extends AbstractVisitor {
     private Node document;
     public CopyVisitor(Node document) {

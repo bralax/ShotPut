@@ -19,6 +19,9 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.servers.Server;
 
+/** Class responsible for generating openapi/swagger specs.
+ * @author Brandon Lax
+ */
 public class OpenApiGenerator {
 
     private Config config;

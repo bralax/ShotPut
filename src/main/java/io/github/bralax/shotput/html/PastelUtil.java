@@ -1,5 +1,8 @@
 package io.github.bralax.shotput.html;
 
+/** Class containing methods used by velocity for interpretting the markdown to html.
+ * @author Brandon Lax
+ */
 public class PastelUtil {
     public String getCSSLinkTag(String name, String media) {
         media = media == null ? "" : media;

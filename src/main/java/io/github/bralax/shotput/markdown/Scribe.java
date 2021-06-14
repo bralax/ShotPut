@@ -22,6 +22,9 @@ import io.github.bralax.shotput.code.SampleCodeGenerator;
 import io.github.bralax.shotput.endpoint.Endpoint;
 import io.github.bralax.shotput.html.Pastel;
 
+/** Class resposible for generating the markdown.
+ * @author Brandon Lax
+ */
 public class Scribe {
     private Pastel pastel;
     private Path outputPath;
@@ -293,9 +296,7 @@ public class Scribe {
     /**
      * Generate Postman collection JSON file.
      *
-     * @param Collection $groupedEndpoints
-     *
-     * @return string
+     * @param groupedEndpoints All the endpoints grouped
      */
     public void generatePostmanCollection(Map<String, List<Endpoint>> groupedEndpoints)
     {

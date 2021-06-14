@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//import javax.swing.plaf.basic.BasicBorders.MarginBorder;
-
 import com.github.javaparser.javadoc.JavadocBlockTag;
 
 import io.github.bralax.shotput.endpoint.Endpoint;
@@ -15,7 +13,16 @@ import io.github.bralax.shotput.endpoint.Parameter;
 import io.github.bralax.shotput.endpoint.Response;
 
 
+/**
+ * Helpers for parsing the tags in a javadoc into a Endpoint.
+ * @author Brandon Lax
+ */
 public class JavadocParser {
+    /**
+     * Base method of this class. Responsible for parsing the javadocs.
+     * @param endpoint The endpoint to add information to
+     * @param tags The javadoc tags to intepret
+     */
     public static void parseJavadocTags(Endpoint endpoint, List<JavadocBlockTag> tags) {
         endpoint.setAuthenticated(false);
         for (JavadocBlockTag tag: tags) {
@@ -43,6 +50,11 @@ public class JavadocParser {
         }
     }
 
+    /**
+     * Method for parsing the response javadoc
+     * @param endpoint The endpoint to add information to
+     * @param tag The javadoc tag to intepret
+     */
     public static void parseResponseJavadoc(Endpoint endpoint, JavadocBlockTag tag) {
         String unparsedContent = tag.getContent().toText().strip();
         Integer code;
@@ -63,9 +75,13 @@ public class JavadocParser {
         }
     }
 
+    /**
+     * Method for parsing any javadoc with a parameter
+     * @param endpoint The endpoint to add information to
+     * @param tag The javadoc tag to intepret
+     */
     public static void parseParameterJavadoc(Endpoint endpoint, JavadocBlockTag tag) {
         String unparsedContent = tag.getContent().toText().strip();
-        //Scanner parser = new Scanner(unparsedContent);
         String paramName, paramType, content, example;
         boolean required = false;
         Pattern pattern = Pattern.compile("(\\w+?)\\s+(Array|Boolean|File|Float|Int|Object|String)?\\s+(required\\s+)?([\\s\\S]*)");
@@ -111,78 +127,5 @@ public class JavadocParser {
                 case "responseField":
                     endpoint.addResponseField(newParam);
         }
-        /*if (parser.hasNext()) {
-            paramName = parser.next();
-            if (parser.hasNext()) {
-                String next = parser.next();
-                if (isValidParameterType(next)) {
-                    paramType = next;
-                    if (parser.hasNext()) {
-                        next = parser.next();
-                        if (next.equalsIgnoreCase("required")) {
-                            required = true;
-                            content = getContent(parser);
-                        } else {
-                            content = next + " " +  getContent(parser);
-                        }
-                    } else {
-                        content = "";
-                    }
-                } else if (next.equalsIgnoreCase("Required")) {
-                    paramType = "String";
-                    required = true;
-                    content = getContent(parser);
-                } else {
-                    paramType = "String";
-                    content = next + " " + getContent(parser);
-                }
-            } else {
-                paramType = "String";
-                content = "";
-            }
-        } else {
-            parser.close();
-            return;
-        }
-        parser.close();
-        Parameter newParam = new Parameter(paramName, content);
-        newParam.setRequired(required);
-        newParam.setType(paramType);
-        switch (tag.getTagName()) {
-            case "queryParam":
-                    endpoint.addQueryParam(newParam);
-                    break;
-                case "pathParam":
-                    newParam.setRequired(true);
-                    endpoint.addPathParam(newParam);
-                    break;
-                case "bodyParam":
-                    endpoint.addFormParam(newParam);
-                    break;
-                case "requestHeader":
-                    endpoint.addHeaderParam(newParam);
-                    break;
-                case "responseHeader":
-                    endpoint.addResponseHeader(newParam);
-                    break;
-                case "responseField":
-                    endpoint.addResponseField(newParam);
-        }*/
     }
-
-    /*private static boolean isValidParameterType(String type) {
-        if (type.endsWith("[]")) {
-            type = type.substring(0, type.length()-2);
-        }
-        String[] types = {"Array", "Boolean", "File", "Float", "Int", "Object", "String"};
-        return Arrays.binarySearch(types, type) >= -1;
-    }
-
-    private static String getContent(Scanner scrn) {
-        StringBuilder builder = new StringBuilder();
-        while(scrn.hasNextLine()) {
-            builder.append(scrn.nextLine()).append("\n");
-        }
-        return builder.toString();
-    }*/
 }

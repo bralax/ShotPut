@@ -22,7 +22,18 @@ import io.github.bralax.shotput.endpoint.Endpoint;
 import io.github.bralax.shotput.endpoint.Parameter;
 import io.github.bralax.shotput.endpoint.Response;
 
+/**
+ * Helpers for parsing the body of a method into an endpoint.
+ * @author Brandon Lax
+ */
 public class MethodParser {
+    /**
+     * Base method of this class. Responsible for parsing the method.
+     * @param stmts The statements inside the method
+     * @param endpoint The endpoint to add information to
+     * @param tags The javadoc tags to intepret
+     * @param ctx The name of the javalin context object
+     */
     public static void parseMethodStatements(NodeList<Statement> stmts, Endpoint endpoint, List<JavadocBlockTag> tags, String ctx) {
         for(Statement stmt: stmts) {
             if (stmt instanceof ExpressionStmt) {
@@ -48,6 +59,13 @@ public class MethodParser {
         }
     }
 
+    /**
+     * Parses one line of a method.
+     * @param endpoint The endpoint to add information to
+     * @param stm The statement to parse
+     * @param tags The javadoc tags to intepret
+     * @param ctx The name of the javalin context object
+     */
     public static void parseMethodExpressionStmt(Endpoint endpoint, ExpressionStmt stm, List<JavadocBlockTag> tags, String ctx ){
         if (stm.getExpression() instanceof MethodCallExpr) {
             MethodCallExpr call = (MethodCallExpr) stm.getExpression();
@@ -64,6 +82,15 @@ public class MethodParser {
         }
     }
 
+    /**
+     * Parses a method call found in the method body. 
+     * Looks for method calls that are called by the context and is one that
+     * can be interpretted.
+     * @param endpoint The endpoint to add information to
+     * @param call The method call to parse
+     * @param tags The javadoc tags to intepret
+     * @param ctx The name of the javalin context object
+     */
     public static void parseMethodCall(Endpoint endpoint, MethodCallExpr call, List<JavadocBlockTag> tags, String ctx) {
         Optional<Expression> exp = call.getScope();
         if (exp.isPresent() && exp.get() instanceof NameExpr) {

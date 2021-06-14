@@ -14,7 +14,17 @@ import org.commonmark.ext.front.matter.YamlFrontMatterVisitor;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 
+/**
+ * Class responsible for parsing a config file.
+ * @author Brandon Lax
+ */
 public class ConfigParser {
+
+    /**
+     * Method responsible for parsing a config file.
+     * @param path the path to the config file.
+     * @return The resulting config file. If the file is not found, it returns the default config.
+     */
     public static Config parseConfig(String path) {
         try {
             String content = Files.readString(Path.of(path));
