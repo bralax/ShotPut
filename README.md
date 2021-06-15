@@ -153,16 +153,6 @@ are not best practices but rather there due to the limitations of the system. It
     2. If you document on the endpoint registration and the handler is a lambda function `ctx -> {...}` or you document on a method declaration the system will run through the function and try to pull out important pieces of information. It will look for every call to `.queryParam`, `.formParam`,`.pathParam`,`.status` and more to build out a skeleton of the information that needs to be provided in the javadoc comment. Currently, if you write the comment on the endpoint registration, this process of interpretting the content of an endpoint can only be done on a lambda expression. This is due to a current system limitation in which it can not currently locate a function outside the scope of the current function. 
 
 
-## Building
-
-The system is based around maven. To build a jar run: 
-`mvn clean compile assembly:single -Pjar`
-The jar will be located at:
-`target/javalindoc-{version}-jar-with-dependencies.jar`
-
-To push to maven use:
-`GPG_TTY=$(tty) mvn clean deploy -Possrh`
-
 ## Why?
 Javalin has a core maintained plugin for generating OpenApi schemas which could easily converted into documentation.
 That plugin has a few issues that made it hard for me to use in my project. In particular, the documenting mechanism is strange. It use a complex annotation system which could be hard to read for those who have not learned it. I am working on a shared code base where i am the main proponent for documenting. This meant that having a more friendly format (like javadoc) comments were able to lower the barier to entry for the team.
