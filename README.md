@@ -26,7 +26,7 @@ It is also possible to add ShotPut as a maven/gradle dependency. It is available
     <version>0.2</version>
 </dependency>
 ```
-There also exists a [Gradle Plugin](https://github.com/bralax/ShotPut-gradle) and a [Maven Plugin]().
+There also exists a [Gradle Plugin](https://github.com/bralax/ShotPut-gradle) and a [Maven Plugin](https://github.com/bralax/ShotPut-maven).
 
 ### Running the Documentation engine Programmatically
 The core class of the Documentation Engine is  `io.github.bralax.shotput.Shotput`. To generate documentation, you need to create an instance of that class and then call it's start method.
@@ -156,9 +156,12 @@ are not best practices but rather there due to the limitations of the system. It
 ## Building
 
 The system is based around maven. To build a jar run: 
-`mvn clean compile assembly:single`
+`mvn clean compile assembly:single -Pjar`
 The jar will be located at:
 `target/javalindoc-{version}-jar-with-dependencies.jar`
+
+To push to maven use:
+`GPG_TTY=$(tty) mvn clean deploy -Possrh`
 
 ## Why?
 Javalin has a core maintained plugin for generating OpenApi schemas which could easily converted into documentation.

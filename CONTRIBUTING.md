@@ -6,7 +6,13 @@ This document describes the format and structure of this project in the case tha
 
 To generate the .jar file run: 
 
-`mvn assembly:assembly -DdescriptorId=jar-with-dependencies -f "{location of pom.xml file}`
+`mvn clean compile assembly:single -Pjar`
+
+The jar will be located at:
+`target/javalindoc-{version}-jar-with-dependencies.jar`
+
+To Deploy the tool to maven central:
+`GPG_TTY=$(tty) MAVEN_OPTS="--add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.text=ALL-UNNAMED --add-opens=java.desktop/java.awt.font=ALL-UNNAMED"  mvn clean deploy -Possrh`
 
 To run the program without creating a .jar file, run:
 `mvn exec:java -Dexec.mainClass="JavalinDoc" -Dexec.args="{any command line arguments}"`
