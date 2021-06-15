@@ -145,7 +145,6 @@ public class MethodParser {
                     case "queryParam":
                         if (call.getArgument(0) instanceof StringLiteralExpr) {
                             JavadocBlockTag tag = ParserHelpers.getCommentTag(tags,"queryParam",((StringLiteralExpr) call.getArgument(0)).asString());
-                            System.out.println("Found Tag: \t"+ tag);
                             if (tag != null) {
                                 JavadocParser.parseParameterJavadoc(endpoint, tag);
                             } else {

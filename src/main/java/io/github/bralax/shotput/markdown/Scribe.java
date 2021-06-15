@@ -18,6 +18,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import io.github.bralax.shotput.Config;
+import io.github.bralax.shotput.Shotput;
 import io.github.bralax.shotput.code.SampleCodeGenerator;
 import io.github.bralax.shotput.endpoint.Endpoint;
 import io.github.bralax.shotput.html.Pastel;
@@ -85,8 +86,7 @@ public class Scribe {
     }
 
     public void writeMarkdownAndSourceFiles(Map<String, List<Endpoint>> parsedRoutes) {
-
-        System.out.println("Writing source Markdown files to: " + this.sourceOutputPath.toString());
+        Shotput.getLogger().info("Writing source Markdown files to: " + this.sourceOutputPath.toString());
 
         if (!this.sourceOutputPath.toFile().exists()) {
             this.sourceOutputPath.toFile().mkdirs();
@@ -99,8 +99,8 @@ public class Scribe {
         this.writeAuthMarkdownFile();
 
         //this.writeModificationTimesTrackingFile();
-
-        System.out.println("Wrote source Markdown files to: " + this.sourceOutputPath.toString());
+        
+        Shotput.getLogger().info("Wrote source Markdown files to: " + this.sourceOutputPath.toString());
     }
 
 
@@ -250,11 +250,11 @@ public class Scribe {
 
     public void writeHtmlDocs()
     {
-        System.out.println("Transforming Markdown docs to HTML...");
+        Shotput.getLogger().info("Transforming Markdown docs to HTML...");
         this.pastel.generate( this.sourceOutputPath.resolve("index.md").toString(),
                              this.outputPath.resolve("html").toAbsolutePath().toString(), null);
         
-        System.out.println("Wrote HTML documentation to: " + this.sourceOutputPath.toString());
+        Shotput.getLogger().info("Wrote HTML documentation to: " + this.sourceOutputPath.toString());
     }
 
 

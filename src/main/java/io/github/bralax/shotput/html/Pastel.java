@@ -34,6 +34,8 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
+
+import io.github.bralax.shotput.Shotput;
 import io.github.bralax.shotput.markdown.CopyVisitor;
 import org.commonmark.Extension;
 import org.commonmark.ext.front.matter.YamlFrontMatterBlock;
@@ -110,7 +112,7 @@ public class Pastel {
                     for (String filename: filePathsToInclude) {
                         Path path = Path.of(filename);
                         if (!path.toFile().exists()) {
-                            System.out.println("Include file " + filename + " not found.");
+                            Shotput.getLogger().info("Include file " + filename + " not found.");
                         } else if (path.toFile().isDirectory()) {
                             for( File f: path.toFile().listFiles()) {
                                 if (f.isFile() && f.getName().endsWith(".md")) {
@@ -170,9 +172,7 @@ public class Pastel {
             copyRecursively("fonts/", destinationFolder);
             copyRecursively("images/", destinationFolder);
         } catch (IOException ex) {
-            System.out.println(ex);
-            ex.printStackTrace();
-            System.out.println("Failed to generate Documentation");
+            Shotput.getLogger().error("Failed to generate Documentation", ex);
         }
     }
 

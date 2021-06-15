@@ -16,7 +16,17 @@ usage: javalin-doc
                          are not set both will be generated
 ```
 Unlike Javadoc, we will not create a docs folder for you. You have to specify an existing folder where you would like the documetation stored.
-Also the classpath is the folder containing the source code you would like to document. You can only supply one folder at time. 
+Also the classpath is the folder containing the source code you would like to document. You can only supply one folder at time.
+
+It is also possible to add ShotPut as a maven/gradle dependency. It is available directly from maven central through:
+```POM
+<dependency>
+    <groupId>io.github.bralax</groupId>
+    <artifactId>shotput</artifactId>
+    <version>0.2</version>
+</dependency>
+```
+There also exists a [Gradle Plugin](https://github.com/bralax/ShotPut-gradle) and a [Maven Plugin]().
 
 ### Running the Documentation engine Programmatically
 The core class of the Documentation Engine is  `io.github.bralax.shotput.Shotput`. To generate documentation, you need to create an instance of that class and then call it's start method.

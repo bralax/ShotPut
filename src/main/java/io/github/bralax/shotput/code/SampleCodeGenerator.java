@@ -2,6 +2,7 @@ package io.github.bralax.shotput.code;
 
 import java.util.Random;
 
+import io.github.bralax.shotput.Shotput;
 import io.github.bralax.shotput.endpoint.Endpoint;
 import io.github.bralax.shotput.endpoint.Parameter;
 
@@ -64,7 +65,7 @@ public abstract class SampleCodeGenerator {
                     }
                 } 
                 if (finalParam != null) {
-                    System.out.println(finalParam);
+                    Shotput.getLogger().debug("Sample Code parameter result", finalParam);
                     builder.append(generateDefaultValue(finalParam));
                 }  else {
                     builder.append(part);

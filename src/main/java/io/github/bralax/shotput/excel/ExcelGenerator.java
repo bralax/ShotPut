@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
+import io.github.bralax.shotput.Shotput;
 import io.github.bralax.shotput.endpoint.Endpoint;
 import io.github.bralax.shotput.endpoint.Parameter;
 
@@ -13,7 +14,6 @@ import io.github.bralax.shotput.endpoint.Parameter;
  */
 public class ExcelGenerator {
     public static void generateExcel(List<Endpoint> endpoints, File out) {
-        //System.out.println(this.out.getAbsolutePath());
         try {
         PrintWriter printWriter = new PrintWriter(out.getAbsolutePath() + "/endpoints.csv");
         printWriter.print("Index,Type,Endpoint,Response Type,Description,Path Parameter, Path Parameter Description, Query Parameter, Query Parameter Description,");
@@ -79,7 +79,7 @@ public class ExcelGenerator {
         printWriter.flush();
         printWriter.close();
         } catch (IOException exception) {
-            System.err.println("Failed to generate CSV!");
+            Shotput.getLogger().error("Failed to generate CSV!", exception);
         }
     }
 

@@ -8,6 +8,9 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.github.bralax.shotput.code.JavaGenerator;
 import io.github.bralax.shotput.code.SampleCodeGenerator;
 import io.github.bralax.shotput.endpoint.Endpoint;
@@ -32,6 +35,9 @@ import java.util.Map;
  * @author Brandon Lax
  */
 public class Shotput {
+    /** The logging tool to use. */
+    private static Logger logger = LoggerFactory.getLogger(Shotput.class);
+
     /** The list of interpretted endpoints. */
     private List<Endpoint> endpoints;
 
@@ -55,6 +61,7 @@ public class Shotput {
 
     /** Boolean of whether to generate a swagger/open-api spec. */
     private boolean swagger;
+
 
     /**
      * Constructor of shotput.
@@ -82,6 +89,24 @@ public class Shotput {
             this.excel = excel;
             this.html = html;
         }
+    }
+
+    /**
+     * Access the logger attached to the system.
+     * @return The current logger.
+     */
+    public static Logger getLogger() {
+        return  Shotput.logger;
+    }
+
+    /**
+     * Set the current SLF4J logger.
+     * Can be used to integrate with other tools that provide a logger.
+     * Can be chained.
+     * @param logger the logger to use.
+     */
+    public static void setLogger(Logger logger) {
+        Shotput.logger = logger;
     }
 
     /**
@@ -129,7 +154,7 @@ public class Shotput {
                 boolean isEmpty = true;
                 for (File f: file.listFiles()) {
                     if (f.isDirectory()) {
-                        System.out.println(f.getAbsolutePath());
+                        Shotput.logger.info("File Path", f.getAbsolutePath());
                         solver.add(new JavaParserTypeSolver(f));
                         isEmpty = false;
                     }
@@ -147,7 +172,6 @@ public class Shotput {
      * @throws IOException If a file can not be found
      */
     private void parse(File f) throws IOException{
-       // System.out.println(f.getAbsolutePath());
         if (f.isDirectory()) {
             for (File file : f.listFiles()) {
                 this.parse(file);
@@ -157,7 +181,6 @@ public class Shotput {
             CodeParser parser = new CodeParser();
             parser.visitPreOrder(unit);
             List<Endpoint> newEndpoints = parser.getEndpoints();
-            //System.out.println(newEndpoints);
             this.endpoints.addAll(newEndpoints);
         }
     }
@@ -182,7 +205,7 @@ public class Shotput {
         printWriter.flush();
         printWriter.close();
        } catch (IOException ex) {
-            System.err.println("Failed to generate OpenApi Spec!");
+            Shotput.logger.error("Failed to generate OpenApi Spec!", ex);
        }
     }
 
