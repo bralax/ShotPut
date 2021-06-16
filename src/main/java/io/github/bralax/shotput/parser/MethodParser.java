@@ -157,7 +157,7 @@ public class MethodParser {
                         break;
                     case "status":
                         if (call.getArgument(0) instanceof IntegerLiteralExpr) {
-                            JavadocBlockTag tag = ParserHelpers.getCommentTag(tags,"responseStatus",((IntegerLiteralExpr) call.getArgument(0)).toString());
+                            JavadocBlockTag tag = ParserHelpers.getCommentTag(tags,"response",((IntegerLiteralExpr) call.getArgument(0)).toString());
                             if (tag != null) {
                                 JavadocParser.parseParameterJavadoc(endpoint, tag);
                             } else {

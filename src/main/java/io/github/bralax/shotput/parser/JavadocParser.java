@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import com.github.javaparser.javadoc.JavadocBlockTag;
 
+import io.github.bralax.shotput.Shotput;
 import io.github.bralax.shotput.endpoint.Endpoint;
 import io.github.bralax.shotput.endpoint.Parameter;
 import io.github.bralax.shotput.endpoint.Response;

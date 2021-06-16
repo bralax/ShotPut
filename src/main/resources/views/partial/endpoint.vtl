@@ -10,8 +10,7 @@ $route.description
 $util.generateRequestForEndpoint($language, $route)
 #end
 
-#if( $route.method == "GET")
-#foreach($response in $route.exampleResponse)
+#foreach($response in  ${route.exampleResponses()})
 > Example response $response.statusCode:
 
 ```json
@@ -23,7 +22,6 @@ $util.generateRequestForEndpoint($language, $route)
 $response.example
 #end
 ```
-#end
 #end
 <div id="execution-results-$endpointId" hidden>
     <blockquote>Received response<span id="execution-response-status-$endpointId"></span>:</blockquote>

@@ -178,7 +178,7 @@ public class Shotput {
             }
         } else if (f.getName().endsWith(".java")) {
             CompilationUnit unit =  StaticJavaParser.parse(f.toPath());
-            CodeParser parser = new CodeParser();
+            CodeParser parser = new CodeParser(this.config);
             parser.visitPreOrder(unit);
             List<Endpoint> newEndpoints = parser.getEndpoints();
             this.endpoints.addAll(newEndpoints);

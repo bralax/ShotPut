@@ -46,6 +46,22 @@ Running the system programatically has one extra feature. The JavalinDoc object 
 ### The Config File
 The system supports using a config file for storing important configs for when generating html. See the provided sample: `exampleConfig.yml`. 
 
+### Disable Method Parsing
+By default, if accessible, the system will parse the lambda expression or method attached to an endpoint (see [Limitations](#limitations) for limits on the parsing). This is especially helpful when you start writing documentation to get a basic structure from the code you wrote. After working on the documentation, it might become helpful to turn this setting off. The system is pretty rigid in it handling of certain cases. For example, if you have a method that looks like this:
+```JAVA
+...
+if (a) {
+    ...
+    ctx.result(x);
+    ctx.status(200);
+    return;
+}
+ctx.result(x);
+ctx.status(200);
+```
+
+The method parsing will assume that both of these should have their own example case as you called the status method seperately twice. We can see from looking at and knowing the code. in both cases the same object and status code were used so it really has 1 example case. Without turning the option off, it will show an extra example case with no body that might be unwanted. By turning off this setting you will no longer see the extra empty examples.
+
 ## Documenting Code
 The system follows a similar set of rules to a traditional javadoc comment. The javadoc comment should be located directly above a call to create a javalin endpoint. The first line of the javadoc is the title of the endpoint. All text after the first line until the tags is the description. The The one major difference is that this system uses a seperate set of `@tags` from Javadocs. Currently, **None** of the normal javadoc `@tags` are available in JavalinDoc. The available tags for JavalinDoc are:
 * `@endpoint` - The address of this endpoint. See point 2 under Limitations to see when this is required

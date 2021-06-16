@@ -57,6 +57,9 @@ public class ConfigParser {
                 if (frontData.containsKey("interactive") && !frontData.get("interactive").isEmpty()) {
                     config.interactive = frontData.get("interactive").get(0).equals("true");
                 }
+                if (frontData.containsKey("disableMethodParsing") && !frontData.get("disableMethodParsing").isEmpty()) {
+                    config.disableMethodParsing = frontData.get("disableMethodParsing").get(0).equals("true");
+                }
                 return config;
             } else {
                 return Config.defaultValue();

@@ -7,6 +7,8 @@ import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.types.ResolvedType;
 
+import io.github.bralax.shotput.Shotput;
+
 /**
  * Class containing a number of helpers used throughout the code parsing.
  * @author Brandon Lax
@@ -44,6 +46,9 @@ public class ParserHelpers {
         for (JavadocBlockTag tag : tags) {
             String content = tag.getContent().toText().strip();
             String tagParam = content.indexOf(" ") >= 0 ? content.substring(0, content.indexOf(" ")) : "";
+            Shotput.getLogger().info("Tag Type: " + tag.getTagName() + "\t Tag Parameter: " + tagParam);
+            Shotput.getLogger().info("Expected Tag Type: "+ type +"\t Expected Parameter: " + param);
+            Shotput.getLogger().info("Matches: " + (tag.getTagName().equals(type) && tagParam.equals(param) ? "TRUE" : "FALSE"));
             if (tag.getTagName().equals(type) && tagParam.equals(param)) {
                 returnTag = tag;
             }

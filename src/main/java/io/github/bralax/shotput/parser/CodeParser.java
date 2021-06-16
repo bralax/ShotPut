@@ -31,6 +31,7 @@ import com.github.javaparser.javadoc.description.JavadocDescriptionElement;
 import com.github.javaparser.javadoc.description.JavadocSnippet;
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
 
+import io.github.bralax.shotput.Config;
 import io.github.bralax.shotput.endpoint.Endpoint;
 
 /** Class resposible for performing the search through the code for endpoints.
@@ -41,8 +42,11 @@ public class CodeParser extends TreeVisitor {
     /** The list of endpoints generated. */
     private Set<Endpoint> endpoints;
 
-    public CodeParser() {
+    private Config config;
+
+    public CodeParser(Config config) {
         this.endpoints = new HashSet<>();
+        this.config = config;
     }
 
     /**
@@ -203,11 +207,13 @@ public class CodeParser extends TreeVisitor {
      * @param tags The list of javadoc tags attached to the endpoint
      */
     private void parseLambdaExpression(LambdaExpr expr, Endpoint endpoint, List<JavadocBlockTag> tags) {
-        String ctx = expr.getParameter(0).getNameAsString();
-        Statement e = expr.getBody();
-        if (e instanceof BlockStmt) {
-            NodeList<Statement> stmts = ((BlockStmt) e).getStatements();
-            MethodParser.parseMethodStatements(stmts, endpoint, tags, ctx);
+        if (!this.config.disableMethodParsing) {
+            String ctx = expr.getParameter(0).getNameAsString();
+            Statement e = expr.getBody();
+            if (e instanceof BlockStmt) {
+                NodeList<Statement> stmts = ((BlockStmt) e).getStatements();
+                MethodParser.parseMethodStatements(stmts, endpoint, tags, ctx);
+            }
         }
 
     }
@@ -219,11 +225,13 @@ public class CodeParser extends TreeVisitor {
      * @param tags The list of javadoc tags attached to the endpoint
      */
     private void parseMethodDeclaration(MethodDeclaration expr, Endpoint endpoint, List<JavadocBlockTag> tags) {
-        String ctx = expr.getParameter(0).getNameAsString();
-        Optional<BlockStmt> e = expr.getBody();
-        if (e.isPresent()) {
-            NodeList<Statement> stmts = e.get().getStatements();
-            MethodParser.parseMethodStatements(stmts, endpoint, tags, ctx);
+        if (!this.config.disableMethodParsing) {
+            String ctx = expr.getParameter(0).getNameAsString();
+            Optional<BlockStmt> e = expr.getBody();
+            if (e.isPresent()) {
+                NodeList<Statement> stmts = e.get().getStatements();
+                MethodParser.parseMethodStatements(stmts, endpoint, tags, ctx);
+            }
         }
     }
 

@@ -30,6 +30,8 @@ public class Config {
     /** The path to the documentation's log. */
     public String logo;
 
+    public boolean disableMethodParsing;
+
     /** Basic constructor for a config.
      * 
      * By default languages is an empty list, interactive is false 
@@ -46,6 +48,7 @@ public class Config {
         config.intro = "";
         config.description = "";
         config.interactive = true;
+        config.disableMethodParsing = false;
         config.logo = null;
         return config;
     }
@@ -104,5 +107,9 @@ public class Config {
      */
     public String getLogo() {
         return logo;
+    }
+
+    public boolean getDisableMethodParsing() {
+        return disableMethodParsing;
     }
 }
