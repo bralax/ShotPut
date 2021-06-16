@@ -37,15 +37,19 @@ public class JavadocParser {
                     break;
                 case "authenticated":
                     endpoint.setAuthenticated(true);
+                    break;
                 case "group":
                     endpoint.setGroup(content);
+                    break;
                 case "responseType":
                     endpoint.setResponseType(content);
                     break;
                 case "response":
                     parseResponseJavadoc(endpoint, tag);
+                    break;
                 default: 
                     parseParameterJavadoc(endpoint, tag);
+                    break;
             }
         }
     }
@@ -72,6 +76,7 @@ public class JavadocParser {
         switch (tag.getTagName()) {
             case "response":
                 endpoint.addExampleResponse(resp);
+                break;
         }
     }
 
@@ -126,6 +131,7 @@ public class JavadocParser {
                     break;
                 case "responseField":
                     endpoint.addResponseField(newParam);
+                    break;
         }
     }
 }

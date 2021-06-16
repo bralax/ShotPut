@@ -51,6 +51,7 @@ The system follows a similar set of rules to a traditional javadoc comment. The 
 * `@endpoint` - The address of this endpoint. See point 2 under Limitations to see when this is required
 * `@type` - The type of endpoint this is. The type should be in all-caps. This parameter is currently unused but in the future will used when specifying an endpoint outside of Limitation 1. 
 * `@authenticated` - A tag indicating that you need to be logged in to access this endpoint. Has no parameters.
+* `@group {group}` - The group that this endpoint belongs to. Will be used when organizing the HTML documentation. Defaults to a value of `Endpoint`
 * `@queryParam` - A query parameter that the system requests. Should be in the format `@queryParam {parameter} {type} [Required] {description}`
 * `@pathParam` - A path parameter that the system requests. Currently all path parameters are required. Should be in the format `@pathParam {parameter} {type} {description}`
 * `@formParam` - A form parameter that the system requests. Form parameters have the ability to be "leveled". See section below on Objects and Arrays for how this works. Should be in the format `@formParam {parameter} {type} [Required] {description}`
