@@ -46,7 +46,7 @@ Running the system programatically has one extra feature. The JavalinDoc object 
 ### The Config File
 The system supports using a config file for storing important configs for when generating html. See the provided sample: `exampleConfig.yml`. 
 
-### Disable Method Parsing
+#### Disable Method Parsing
 By default, if accessible, the system will parse the lambda expression or method attached to an endpoint (see [Limitations](#limitations) for limits on the parsing). This is especially helpful when you start writing documentation to get a basic structure from the code you wrote. After working on the documentation, it might become helpful to turn this setting off. The system is pretty rigid in it handling of certain cases. For example, if you have a method that looks like this:
 ```JAVA
 ...
