@@ -159,7 +159,7 @@ public class MethodParser {
                         if (call.getArgument(0) instanceof IntegerLiteralExpr) {
                             JavadocBlockTag tag = ParserHelpers.getCommentTag(tags,"response",((IntegerLiteralExpr) call.getArgument(0)).toString());
                             if (tag != null) {
-                                JavadocParser.parseParameterJavadoc(endpoint, tag);
+                                JavadocParser.parseResponseJavadoc(endpoint, tag);
                             } else {
                                 int status = call.getArgument(0).asIntegerLiteralExpr().asNumber().intValue();
                                 endpoint.addExampleResponse(new Response(status, "", ""));

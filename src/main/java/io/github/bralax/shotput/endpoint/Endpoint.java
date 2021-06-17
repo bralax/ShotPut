@@ -324,6 +324,7 @@ public class Endpoint {
       return "{endpoint : {type:"+this.type +  "\n" +
       "Endpoint: " + this.endpoint  + "\n" +
       "Response Type: " + this.responseType + "\n" + 
+      "Endpoint Title: " + this.title + "\n" +
       "Endpoint Description: " + this.description  + "\n" +
       "Path Parameters: " + this.pathParams + "\n" + 
       "Query Parameters: " + this.queryParams + "\n" +
@@ -332,8 +333,7 @@ public class Endpoint {
       "Request Headers" + this.headerParams + "\n" + 
       "Response Headers" + this.responseHeaders + "\n" +
       "Response Fields: " + this.responseFields + "\n" + 
-      "Example Responses: " + this.exampleResponses //+ 
-      //"Response Status Codes: " + this.responseStatuses 
+      "Example Responses: " + this.exampleResponses
       + "}";
    }
 

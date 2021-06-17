@@ -154,7 +154,7 @@ public class Shotput {
                 boolean isEmpty = true;
                 for (File f: file.listFiles()) {
                     if (f.isDirectory()) {
-                        Shotput.logger.info("File Path", f.getAbsolutePath());
+                        Shotput.logger.info("File Path {}", f.getAbsolutePath());
                         solver.add(new JavaParserTypeSolver(f));
                         isEmpty = false;
                     }

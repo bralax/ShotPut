@@ -44,7 +44,7 @@ public class Config {
     public static Config defaultValue() {
         Config config = new Config();
         config.title = "Documentation";
-        config.baseUrl = "http://localhost:3000";
+        config.baseUrl = "http://localhost:7000";
         config.intro = "";
         config.description = "";
         config.interactive = true;
